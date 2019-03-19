@@ -16,4 +16,4 @@ run `deneme.py` to start the simulation.
 
 Note: `deneme` is the current state of the created gym environment. 
 Agents are not controlled with an RL algorithm yet. But the environment has all the 
-necessary functions (step(), reset() etc.) and ready to run by an RL algorithm.
+necessary functions (step(), reset() etc.) and ready to run by an RL algorithm. 
