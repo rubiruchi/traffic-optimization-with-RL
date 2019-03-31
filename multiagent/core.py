@@ -1,7 +1,19 @@
+'''
+Entity state
+Agent state
+Action
+Entity
+Landmark
+Agent
+'''
+
 import numpy as np
 
 # physical/external base state of all entites
 class EntityState(object):
+    '''
+    Consists of position and velocity of the entity
+    '''
     def __init__(self):
         # physical position
         self.p_pos = None
@@ -10,21 +22,31 @@ class EntityState(object):
 
 # state of agents (including communication and internal/mental state)
 class AgentState(EntityState):
+    '''
+    Addition to entity state it has a communication state
+    '''
     def __init__(self):
         super(AgentState, self).__init__()
         # communication utterance
         self.c = None
 
-# action of the agent
+#! action of the agent
 class Action(object):
+    '''
+    Physical and communication action
+    '''
     def __init__(self):
         # physical action
         self.u = None
         # communication action
         self.c = None
 
-# properties and state of physical world entity
+#! properties and state of physical world entity
 class Entity(object):
+    '''
+    Entity object has a name, size, movable, collide, density, color, 
+    max speed, acceleration, entity state and inital mass
+    '''
     def __init__(self):
         # name 
         self.name = ''
@@ -51,13 +73,17 @@ class Entity(object):
         return self.initial_mass
 
 # properties of landmark entities
-#! landmarks have an argument about their position 
+ 
 class Landmark(Entity):
-     def __init__(self, pos = 'hor'):
+    '''
+    Landmarks have an argument about their position hor or vec
+    '''
+    def __init__(self, pos = 'hor', shape = (0.2, 0.8)):
         super(Landmark, self).__init__()
         self.pos = pos
+        self.shape = shape
 
-# properties of agent entities
+#! properties of agent entities
 class Agent(Entity):
     def __init__(self):
         super(Agent, self).__init__()
@@ -92,7 +118,7 @@ class World(object):
         self.dim_p = 2
         # color dimensionality
         self.dim_color = 3
-        # simulation timestep
+        #! simulation timestep
         self.dt = 0.1
         # physical damping
         self.damping = 0.25
@@ -164,6 +190,7 @@ class World(object):
             if (p_force[i] is not None):
                 entity.state.p_vel += (p_force[i] / entity.mass) * self.dt
             if entity.max_speed is not None:
+                #! velocity calculation
                 speed = np.sqrt(np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1]))
                 if speed > entity.max_speed:
                     entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
@@ -185,15 +212,29 @@ class World(object):
             return [None, None] # not a collider
         if (entity_a is entity_b):
             return [None, None] # don't collide against itself
-        # compute actual distance between entities
-        delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
-        dist = np.sqrt(np.sum(np.square(delta_pos)))
-        # minimum allowable distance
-        dist_min = entity_a.size + entity_b.size
-        # softmax penetration
-        k = self.contact_margin
-        penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
-        force = self.contact_force * delta_pos / dist * penetration
-        force_a = +force if entity_a.movable else None
-        force_b = -force if entity_b.movable else None
-        return [force_a, force_b]
+        if (isinstance(entity_a, Landmark) and isinstance(entity_b, Agent)):            
+            if(entity_a.pos == 'hor'):
+                if((entity_a.p_pos[0] - entity_a.shape[0]/2 ) == (entity_b.p_pos[0] + entity_b.size) \
+                and (entity_b.p_pos[0] > (entity_a.p_pos[1] - entity_a.shape[1]/2)) \
+                and (entity_b.p_pos[0] < (entity_a.p_pos[1] + entity_a.shape[1]/2))):
+                    entity_b.p_vel = entity_b.p_vel * [1 , -1]
+            if(entity_a.pos == 'ver'):
+                pass
+            return [np.zeros(2) ,np.zeros(2)]
+            # return [np.random.randn(2),np.random.randn(2)]
+        elif (isinstance(entity_b, Landmark) and isinstance(entity_a, Agent)):
+            return [np.zeros(2) ,np.zeros(2)]
+            # return [np.random.randn(2),np.random.randn(2)]
+        else: # if both are agents 
+            # compute actual distance between entities
+            delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
+            dist = np.sqrt(np.sum(np.square(delta_pos)))
+            # minimum allowable distance
+            dist_min = entity_a.size + entity_b.size
+            # softmax penetration
+            k = self.contact_margin
+            penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+            force = self.contact_force * delta_pos / dist * penetration
+            force_a = +force if entity_a.movable else None
+            force_b = -force if entity_b.movable else None
+            return [force_a, force_b]

@@ -244,10 +244,12 @@ class MultiAgentEnv(gym.Env):
             for entity in self.world.entities:
                 #! render landmark according to their position 
                 if entity in self.world.landmarks:
+                    w, h = entity.shape
+                    w_half, h_half = w/2, h/2
                     if entity.pos == 'ver':
-                        geom = rendering.make_polygon([[0.1,-0.4],[0.1,0.4],[-0.1,0.4],[-0.1,-0.4]])
+                        geom = rendering.make_polygon([[w_half,-h_half],[w_half,h_half],[-w_half,h_half],[-w_half,-h_half]])
                     if entity.pos == 'hor':
-                        geom = rendering.make_polygon([[0.4,-0.1],[0.4,0.1],[-0.4,0.1],[-0.4,-0.1]])
+                        geom = rendering.make_polygon([[h_half,-w_half],[h_half,w_half],[-h_half,w_half],[-h_half,-w_half]])
 
                 else: geom = rendering.make_circle(entity.size)
                 xform = rendering.Transform()

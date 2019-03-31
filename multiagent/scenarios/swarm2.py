@@ -11,7 +11,7 @@ class Scenario(BaseScenario):
         num_good_agents = 10
         num_adversaries = 10
         num_agents = num_adversaries + num_good_agents
-        num_landmarks = 8 #88
+        num_landmarks = 8 
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -39,6 +39,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
             landmark.size = 0.05
             landmark.boundary = False
+            landmark.shape = (0.2, 0.8)
         # make initial conditions
         self.reset_world(world)
         return world
@@ -73,56 +74,8 @@ class Scenario(BaseScenario):
                 landmark.state.p_pos = np.array([((i-1)-1.5)/1.5, 0.635])
             elif i > -1 : #vertical
                 landmark.state.p_pos = np.array([((i+1)-1.5)/1.5,-0.635])
-
-            # if i>=2: #horizontal
-            #     landmark.state.p_pos = np.array([0.7,-0.5])
-            # if i>=0: #vertical 
-            #     landmark.state.p_pos = np.array([((i-1)+0.5)*1.2,0.5])
-            # landmark.state.p_pos = np.array([-0.6,0])
-            # landmark.state.p_pos = np.array([-0.6,0])
-
-            # landmark.state.p_pos = np.random.uniform(-1,+1, world.dim_p)
-
-            # Position of the cross roads
-            # if i >= 70:
-            #     landmark.state.p_pos = np.array([-0.2,(i-68)*(2/20)])
-            # elif i >= 60:
-            #     landmark.state.p_pos = np.array([-0.2,(i-71)*(2/20)])
-
-            # elif i >= 50:
-            #     landmark.state.p_pos = np.array([0.2,(i-48)*(2/20)])
-            # elif i >= 40:
-            #     landmark.state.p_pos = np.array([0.2,(i-51)*(2/20)])
-
-            
-            # elif i >= 30:
-            #     landmark.state.p_pos = np.array([(i-28)*(2/20),-0.2])
-            # elif i >= 20:
-            #     landmark.state.p_pos = np.array([(i-31)*(2/20),-0.2])
-
-            # elif i >= 10:
-            #     landmark.state.p_pos = np.array([(i-8)*(2/20),0.2])
-            # elif i >= 0:
-            #     landmark.state.p_pos = np.array([(i-11)*(2/20),0.2])
-
-
-            
-
-
-            #     landmark.state.p_pos = np.array([(i-39)*(2/20)-1,0.4])
-            # elif i > 20:
-            #     landmark.state.p_pos = np.array([-0.4,(i-19)*(2/20)-1])
-            # else:
-            #     landmark.state.p_pos = np.array([0.4,(i)*(2/20)-1])
-
+      
             landmark.state.p_vel = np.zeros(world.dim_p)
-        
-        # for i, landmark in enumerate(world.landmarks):
-        #     if not landmark.boundary:
-        #         # landmark.state.p_pos = [-0.8+i*(1.6/len(world.landmarks)) ,0.8]
-        #         landmark.state.p_pos = np.random.uniform(-0.9, +0.9, world.dim_p)
-        #         landmark.state.p_vel = np.zeros(world.dim_p)
-
 
     def benchmark_data(self, agent, world):
         # returns number of collisions for adversary agent

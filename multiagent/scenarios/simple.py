@@ -29,6 +29,7 @@ class Scenario(BaseScenario):
             landmark.collide = True
             landmark.movable = False
             landmark.size = 0.05
+            landmark.shape = (0.2, 0.8)
             landmark.boundary = False
         # make initial conditions
         self.reset_world(world)
