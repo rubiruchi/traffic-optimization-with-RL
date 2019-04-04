@@ -11,7 +11,7 @@ class Scenario(BaseScenario):
         num_good_agents = 10
         num_adversaries = 10
         num_agents = num_adversaries + num_good_agents
-        num_landmarks = 8 
+        num_landmarks = 1 
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -37,7 +37,7 @@ class Scenario(BaseScenario):
             landmark.name = 'landmark %d' % i
             landmark.collide = True
             landmark.movable = False
-            landmark.size = 0.05
+            landmark.size = 0#0.05
             landmark.boundary = False
             landmark.shape = (0.2, 0.8)
         # make initial conditions
@@ -54,7 +54,8 @@ class Scenario(BaseScenario):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
         for agent in world.agents:
-            if agent.adversary: #! position of the agents 
+            if agent.adversary: #! position of the agents
+                # agent.state.p_pos = np.array([-1,0]) + agent.size
                 agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0,0.7])
             else:
                 agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0.7,0])
@@ -73,8 +74,8 @@ class Scenario(BaseScenario):
             elif i > 1 : #vertical
                 landmark.state.p_pos = np.array([((i-1)-1.5)/1.5, 0.635])
             elif i > -1 : #vertical
-                landmark.state.p_pos = np.array([((i+1)-1.5)/1.5,-0.635])
-      
+                # landmark.state.p_pos = np.array([((i+1)-1.5)/1.5,-0.635])
+                landmark.state.p_pos = np.array([0,0])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):

@@ -8,7 +8,7 @@ Agent
 '''
 
 import numpy as np
-
+import sys
 # physical/external base state of all entites
 class EntityState(object):
     '''
@@ -82,6 +82,7 @@ class Landmark(Entity):
         super(Landmark, self).__init__()
         self.pos = pos
         self.shape = shape
+    
 
 #! properties of agent entities
 class Agent(Entity):
@@ -170,6 +171,8 @@ class World(object):
     # gather physical forces acting on entities
     def apply_environment_force(self, p_force):
         # simple (but inefficient) collision response
+        a = [type(entity) for entity in self.entities]
+        
         for a,entity_a in enumerate(self.entities):
             for b,entity_b in enumerate(self.entities):
                 if(b <= a): continue
@@ -208,33 +211,41 @@ class World(object):
     #! Collision is wrong for square objects, need to reformulate this 
     # get collision forces for any contact between two entities
     def get_collision_force(self, entity_a, entity_b):
+        #get collision
         if (not entity_a.collide) or (not entity_b.collide):
             return [None, None] # not a collider
         if (entity_a is entity_b):
             return [None, None] # don't collide against itself
-        if (isinstance(entity_a, Landmark) and isinstance(entity_b, Agent)):            
-            if(entity_a.pos == 'hor'):
-                if((entity_a.p_pos[0] - entity_a.shape[0]/2 ) == (entity_b.p_pos[0] + entity_b.size) \
-                and (entity_b.p_pos[0] > (entity_a.p_pos[1] - entity_a.shape[1]/2)) \
-                and (entity_b.p_pos[0] < (entity_a.p_pos[1] + entity_a.shape[1]/2))):
-                    entity_b.p_vel = entity_b.p_vel * [1 , -1]
-            if(entity_a.pos == 'ver'):
-                pass
-            return [np.zeros(2) ,np.zeros(2)]
-            # return [np.random.randn(2),np.random.randn(2)]
-        elif (isinstance(entity_b, Landmark) and isinstance(entity_a, Agent)):
-            return [np.zeros(2) ,np.zeros(2)]
-            # return [np.random.randn(2),np.random.randn(2)]
-        else: # if both are agents 
-            # compute actual distance between entities
-            delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
-            dist = np.sqrt(np.sum(np.square(delta_pos)))
-            # minimum allowable distance
-            dist_min = entity_a.size + entity_b.size
-            # softmax penetration
-            k = self.contact_margin
-            penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
-            force = self.contact_force * delta_pos / dist * penetration
-            force_a = +force if entity_a.movable else None
-            force_b = -force if entity_b.movable else None
-            return [force_a, force_b]
+        #* if entity_a is a Agent & entity_b is a Landmark
+        if (isinstance(entity_a, Agent) and isinstance(entity_b, Landmark)):
+            # print(type(entity_a),type(entity_b) )
+            
+            if(entity_b.pos == 'ver'):
+                dumping = 0.01
+                delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
+                if(np.abs(delta_pos[0]) - dumping <= entity_b.shape[0]/2 + entity_a.size):
+                    if(np.abs(delta_pos[1]) <= entity_b.shape[1]/2 + entity_a.size):
+                    #* collison
+                        print('Collision')
+                        dist = np.sqrt(np.sum(np.square(delta_pos)))
+                        
+                        upperline = entity_b.state.p_pos[1] + entity_b.shape[1]/2
+                        lowerline = entity_b.state.p_pos[1] - entity_b.shape[1]/2
+                        rightline = entity_b.state.p_pos[0] + entity_b.shape[0]/2
+                        leftline  = entity_b.state.p_pos[0] - entity_b.shape[0]/2
+                    
+                        #* if horizontal collision
+                        if(leftline <= entity_a.state.p_pos[0] and \
+                            rightline >= entity_a.state.p_pos[0]):
+                            #*change horizontal velocity
+                            entity_a.state.p_vel = entity_a.state.p_vel*[-100,1]
+
+                        #* if vertical collision
+                        if(lowerline <= entity_a.state.p_pos[1] and \
+                            upperline >= entity_a.state.p_pos[1]):
+                            #*change vertical velocity
+                            entity_a.state.p_vel = entity_a.state.p_vel*[1,-100]
+
+                        pass
+                        
+        return [np.zeros(2) ,np.zeros(2)]
