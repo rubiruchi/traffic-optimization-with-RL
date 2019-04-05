@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 # creates an multiagent environment which has reset, render, step
-env = make_env_.make_env('swarm2') #! 2vs1 Swarm environment
+env = make_env_.make_env('traffic') #! 2vs1 Swarm environment
 # env = make_env_.make_env('simple_tag_guided_1v2')
 # create interactive policies for each agent
 # policies = [InteractivePolicy(env,i) for i in range(env.n)]

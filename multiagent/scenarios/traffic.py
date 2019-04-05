@@ -39,7 +39,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
             landmark.size = 0#0.05
             landmark.boundary = False
-            landmark.shape = (0.2, 0.8)
+            landmark.shape = (0.2, 0.2)
         # make initial conditions
         self.reset_world(world)
         return world
@@ -62,9 +62,8 @@ class Scenario(BaseScenario):
  
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
+        
         for i, landmark in enumerate(world.landmarks): #! position of the walls
-            
-            
         
             if i > 5 : #horizontal
                 landmark.state.p_pos = np.array([0.635,((i-5)-1.5)/1.5])
@@ -136,11 +135,6 @@ class Scenario(BaseScenario):
             for a in adversaries:
                 if self.is_collision(a, agent):
                     rew -= 10
-        #! punishment 
-        for p in range(world.dim_p):
-            x = abs(agent.state.p_pos[p])
-            rew -= self.bound(x)
-
         return rew
 
     def adversary_reward(self, agent, world):
@@ -157,11 +151,6 @@ class Scenario(BaseScenario):
                 for adv in adversaries:
                     if self.is_collision(ag, adv):
                         rew += 10
-        #! punishment                
-        for p in range(world.dim_p):
-            x = abs(agent.state.p_pos[p])
-            rew -= self.bound(x)
-            
         return rew
 
     def observation(self, agent, world):
