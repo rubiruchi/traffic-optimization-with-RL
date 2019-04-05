@@ -221,7 +221,7 @@ class World(object):
             # print(type(entity_a),type(entity_b) )
             
             if(entity_b.pos == 'ver'):
-                dumping = 0.01
+                dumping = 0.001
                 delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
                 if(np.abs(delta_pos[0]) - dumping <= entity_b.shape[0]/2 + entity_a.size):
                     if(np.abs(delta_pos[1]) <= entity_b.shape[1]/2 + entity_a.size):
@@ -237,15 +237,50 @@ class World(object):
                         #* if horizontal collision
                         if(leftline <= entity_a.state.p_pos[0] and \
                             rightline >= entity_a.state.p_pos[0]):
+                            #* apply horizontal force
+                            # minimum allowable distance
+                            dist_min = entity_a.size + entity_b.shape[1] + dumping
+                            # softmax penetration
+                            k = self.contact_margin
+                            penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+                            force = 2*(self.contact_force * delta_pos / dist * penetration)
+                            force_a = np.array([0,force[1]])  if entity_a.movable else None
+                            force_b = np.zeros(2)
+                            return [force_a, force_b] 
                             #*change horizontal velocity
-                            entity_a.state.p_vel = entity_a.state.p_vel*[-100,1]
+                            # entity_a.state.p_vel = entity_a.state.p_vel*[-1e5,1]
 
                         #* if vertical collision
                         if(lowerline <= entity_a.state.p_pos[1] and \
                             upperline >= entity_a.state.p_pos[1]):
+                            #* apply vertical force
+                            # minimum allowable distance
+                            dist_min = entity_a.size + entity_b.shape[0] + dumping
+                            # softmax penetration
+                            k = self.contact_margin
+                            penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+                            force = 2*(self.contact_force * delta_pos / dist * penetration)
+                            force_a = np.array([force[0],0])  if entity_a.movable else None
+                            force_b = np.zeros(2)
+                            return [force_a, force_b]
                             #*change vertical velocity
-                            entity_a.state.p_vel = entity_a.state.p_vel*[1,-100]
+                            # entity_a.state.p_vel = entity_a.state.p_vel*[1,-1e5]
 
                         pass
-                        
+            if(entity_b.pos == 'hor'):
+                pass
+        #* if entity_a is a Agent & entity_b is a Agent
+        if (isinstance(entity_a, Agent) and isinstance(entity_b, Agent)):
+            # compute actual distance between entities
+            delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
+            dist = np.sqrt(np.sum(np.square(delta_pos)))
+            # minimum allowable distance
+            dist_min = entity_a.size + entity_b.size
+            # softmax penetration
+            k = self.contact_margin
+            penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+            force = self.contact_force * delta_pos / dist * penetration
+            force_a = +force if entity_a.movable else None
+            force_b = -force if entity_b.movable else None
+            return [force_a, force_b]                
         return [np.zeros(2) ,np.zeros(2)]

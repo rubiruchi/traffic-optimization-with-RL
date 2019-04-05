@@ -11,7 +11,7 @@ class Scenario(BaseScenario):
         num_good_agents = 10
         num_adversaries = 10
         num_agents = num_adversaries + num_good_agents
-        num_landmarks = 1 
+        num_landmarks = 8 
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -74,8 +74,8 @@ class Scenario(BaseScenario):
             elif i > 1 : #vertical
                 landmark.state.p_pos = np.array([((i-1)-1.5)/1.5, 0.635])
             elif i > -1 : #vertical
-                # landmark.state.p_pos = np.array([((i+1)-1.5)/1.5,-0.635])
-                landmark.state.p_pos = np.array([0,0])
+                landmark.state.p_pos = np.array([((i+1)-1.5)/1.5,-0.635])
+                # landmark.state.p_pos = np.array([0,0])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):

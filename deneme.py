@@ -38,15 +38,16 @@ def deterministic_actions2():
 
 def fixed():
 	# act =  list(np.random.uniform(-1,0.5,4))
-	act = [random.uniform(-0.1,0.1),0,0,1]
-	return act
-	
-def fixed2():
-	# act =  list(np.random.uniform(-1,0.5,4))
-	act = [0,1,0,random.uniform(-0.1,0.1)]
+	act = [random.uniform(-0.1,0.1),0,0,random.choice([1,1,1,0,0],)]
 	return act
 
-for i_episode in range(3):# number of simulations 
+def fixed2():
+	# act =  list(np.random.uniform(-1,0.5,4))
+	act = [0,np.random.choice([1,1,1,0,0]),0,random.uniform(-0.1,0.1)]
+	return act
+
+
+for i_episode in range(2):# number of simulations 
     observation = env.reset()
     # print(len(observation[0]))
     for t in range(150):# number of steps
