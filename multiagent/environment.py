@@ -242,7 +242,7 @@ class MultiAgentEnv(gym.Env):
             self.render_geoms = []
             self.render_geoms_xform = []
             for entity in self.world.entities:
-                line = None
+                # line = None
                 #! render landmark according to their position 
                 if entity in self.world.landmarks:
                     w, h = entity.shape
@@ -253,18 +253,18 @@ class MultiAgentEnv(gym.Env):
                         geom = rendering.make_polygon([[h_half,-w_half],[h_half,w_half],[-h_half,w_half],[-h_half,-w_half]])
                 else: 
                     geom = rendering.make_circle(entity.size)
-                    line = rendering.make_polygon([[4*entity.size,-0.01],[4*entity.size,0.01],[entity.size,0.01],[entity.size,-0.01] ])
+                    # line = rendering.make_polygon([[4*entity.size,-0.01],[4*entity.size,0.01],[entity.size,0.01],[entity.size,-0.01] ])
                 xform = rendering.Transform()
                 if 'agent' in entity.name:
                     geom.set_color(*entity.color, alpha=0.5)
-                    if line:line.set_color(*entity.color, alpha=0.5)
+                    # if line:line.set_color(*entity.color, alpha=0.5)
                 else:
                     geom.set_color(*entity.color)
                     
                 geom.add_attr(xform)
-                if line:line.add_attr(xform)
+                # if line:line.add_attr(xform)
                 self.render_geoms.append(geom)
-                if line:self.render_geoms.append(line)
+                # if line:self.render_geoms.append(line)
                 self.render_geoms_xform.append(xform)
 
             # add geoms to viewer
