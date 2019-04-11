@@ -78,7 +78,7 @@ class Landmark(Entity):
     '''
     Landmarks have an argument about their position hor or vec
     '''
-    def __init__(self, pos = 'hor', shape = (0.2, 0.8)):
+    def __init__(self, pos = 'ver', shape = (0.2, 0.8)):
         super(Landmark, self).__init__()
         self.pos = pos
         self.shape = shape

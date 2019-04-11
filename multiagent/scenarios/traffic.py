@@ -2,7 +2,45 @@ import numpy as np
 from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario
 import sys
- 
+from grid_to_map import *
+
+#* map 
+grid1 = np.array([
+	[0,0,0,1,0,0,1,0,0,0],
+	[0,0,0,1,0,0,1,0,0,0],
+	[0,0,0,1,0,0,1,0,0,0],
+	[1,1,1,1,0,0,1,1,1,1],
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0],
+	[1,1,1,1,0,0,1,1,1,1],
+	[0,0,0,1,0,0,1,0,0,0],
+	[0,0,0,1,0,0,1,0,0,0],
+	[0,0,0,1,0,0,1,0,0,0]
+]) 
+grid2 = np.array([
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,1,1,0,0,0,0],
+	[0,0,0,1,1,1,1,0,0,0],
+	[0,0,1,1,0,0,1,1,0,0],
+	[0,0,1,1,0,0,1,1,0,0],
+	[0,1,1,1,1,1,1,1,1,0],
+	[0,1,1,1,1,1,1,1,1,0],
+	[1,1,1,0,0,0,0,1,1,1],
+	[1,1,0,0,0,0,0,0,1,1],
+	[1,0,0,0,0,0,0,0,0,1]
+]) 
+grid3 = np.array([
+	[0,0,0,0,0,0,0,0,0,0],
+	[0,0,1,1,0,0,0,0,1,1],
+	[0,0,1,1,0,0,0,1,1,0],
+	[0,0,1,1,0,0,1,1,0,0],
+	[0,0,1,1,1,1,1,0,0,0],
+	[0,0,1,1,1,1,1,0,0,0],
+	[0,0,1,1,0,0,1,1,0,0],
+	[0,0,1,1,0,0,0,1,1,0],
+	[0,0,1,1,0,0,0,0,1,1],
+	[0,0,0,0,0,0,0,0,0,0]
+]) 
 class Scenario(BaseScenario):
     def make_world(self):
         world = World()
@@ -11,7 +49,7 @@ class Scenario(BaseScenario):
         num_good_agents = 10
         num_adversaries = 10
         num_agents = num_adversaries + num_good_agents
-        num_landmarks = 8 
+        num_landmarks = getnumberofwall(grid1)
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -29,7 +67,7 @@ class Scenario(BaseScenario):
             else:
                 agent.max_speed = 1.0/5 - 0.1 if agent.adversary else 1.0/5 - 0.1
         #! add landmarks vertical and horizontal
-        world.landmarks = [Landmark('ver') if i < num_landmarks/2 else Landmark('hor') for i in range(num_landmarks)]
+        world.landmarks = [Landmark('ver') for i in range(num_landmarks)]
         # print([(i, lan.pos) for i,lan in enumerate(world.landmarks) ])
         # sys.exit()
 
@@ -64,16 +102,17 @@ class Scenario(BaseScenario):
             agent.state.c = np.zeros(world.dim_c)
         
         for i, landmark in enumerate(world.landmarks): #! position of the walls
-        
-            if i > 5 : #horizontal
-                landmark.state.p_pos = np.array([0.635,((i-5)-1.5)/1.5])
-            elif i > 3 : #horizontal
-                landmark.state.p_pos = np.array([-0.635,((i-3)-1.5)/1.5])
+            landmark.state.p_pos = np.array(grid2pos(grid1, 0.2))[i]
+
+            # if i > 5 : #horizontal
+            #     landmark.state.p_pos = np.array([0.635,((i-5)-1.5)/1.5])
+            # elif i > 3 : #horizontal
+            #     landmark.state.p_pos = np.array([-0.635,((i-3)-1.5)/1.5])
            
-            elif i > 1 : #vertical
-                landmark.state.p_pos = np.array([((i-1)-1.5)/1.5, 0.635])
-            elif i > -1 : #vertical
-                landmark.state.p_pos = np.array([((i+1)-1.5)/1.5,-0.635])
+            # elif i > 1 : #vertical
+            #     landmark.state.p_pos = np.array([((i-1)-1.5)/1.5, 0.635])
+            # elif i > -1 : #vertical
+            #     landmark.state.p_pos = np.array([((i+1)-1.5)/1.5,-0.635])
                 # landmark.state.p_pos = np.array([0,0])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
