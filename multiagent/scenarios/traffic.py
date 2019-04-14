@@ -51,9 +51,9 @@ class Scenario(BaseScenario):
         world = World()
         # set any world properties first
         world.dim_c = 0
-        num_good_agents = 10
-        num_adversaries = 10
-        num_agents = num_adversaries + num_good_agents
+        num_of_group1 = 10
+        num_of_group2 = 10
+        num_agents = num_of_group2 + num_of_group1
         num_landmarks = getnumberofwall(grid1)
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
@@ -61,16 +61,16 @@ class Scenario(BaseScenario):
             agent.name = 'agent %d' % i
             agent.collide = True
             agent.silent = True
-            agent.adversary = True if i < num_adversaries else False
-            agent.size = 0.04 if agent.adversary else 0.04
-            agent.accel = 3.0 if agent.adversary else 3.0
-            #agent.accel = 20.0 if agent.adversary else 25.0
-            # agent.max_speed = 1.0 if agent.adversary else 1.0
+            agent.group2 = True if i < num_of_group2 else False
+            agent.size = 0.04 if agent.group2 else 0.04
+            agent.accel = 3.0 if agent.group2 else 3.0
+            #agent.accel = 20.0 if agent.group2 else 25.0
+            # agent.max_speed = 1.0 if agent.group2 else 1.0
             #! fast agents shows wrong movements
             if i%2 ==0 :
-                agent.max_speed = 1.0/5  if agent.adversary else 1.0/5 
+                agent.max_speed = 1.0/5  if agent.group2 else 1.0/5 
             else:
-                agent.max_speed = 1.0/5 - 0.1 if agent.adversary else 1.0/5 - 0.1
+                agent.max_speed = 1.0/5 - 0.1 if agent.group2 else 1.0/5 - 0.1
         #! add landmarks vertical and horizontal
         world.landmarks = [Landmark('ver') for i in range(num_landmarks)]
         # print([(i, lan.pos) for i,lan in enumerate(world.landmarks) ])
@@ -91,13 +91,13 @@ class Scenario(BaseScenario):
     def reset_world(self, world):
         # random properties for agents
         for i, agent in enumerate(world.agents):
-            agent.color = np.array([0.35, 0.85, 0.35]) if not agent.adversary else np.array([0.85, 0.35, 0.35])
+            agent.color = np.array([0.35, 0.85, 0.35]) if not agent.group2 else np.array([0.85, 0.35, 0.35])
             # random properties for landmarks
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
         for agent in world.agents:
-            if agent.adversary: #! position of the agents
+            if agent.group2: #! position of the agents
                 # agent.state.p_pos = np.array([-1,0]) + agent.size
                 agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0,0.7])
             else:
@@ -122,15 +122,15 @@ class Scenario(BaseScenario):
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
-        # returns number of collisions for adversary agent
-        if agent.adversary:
+        # returns number of collisions for group2 agent
+        if agent.group2:
             collisions = 0
             for ga in self.good_agents(world):
                 if self.is_collision(ga, agent):
                     collisions += 1
             return collisions
 
-        if not agent.adversary:
+        if not agent.group2:
             collisions = 0
             for adv in self.adversaries(world):
                 if self.is_collision(adv, agent):
@@ -148,16 +148,16 @@ class Scenario(BaseScenario):
 
     # return all agents that are not adversaries
     def good_agents(self, world):
-        return [agent for agent in world.agents if not agent.adversary]
+        return [agent for agent in world.agents if not agent.group2]
 
     # return all adversarial agents
     def adversaries(self, world):
-        return [agent for agent in world.agents if agent.adversary]
+        return [agent for agent in world.agents if agent.group2]
 
 
     def reward(self, agent, world):
         # Agents are rewarded based on minimum agent distance to each landmark
-        main_reward = self.adversary_reward(agent, world) if agent.adversary else self.agent_reward(agent, world)
+        main_reward = self.group2_reward(agent, world) if agent.group2 else self.agent_reward(agent, world)
         return main_reward
 
     def bound(self,x):
@@ -172,7 +172,7 @@ class Scenario(BaseScenario):
         rew = 0
         shape = False #!False
         adversaries = self.adversaries(world)
-        if shape:  # reward can optionally be shaped (increased reward for increased distance from adversary)
+        if shape:  # reward can optionally be shaped (increased reward for increased distance from group2)
             for adv in adversaries:
                 rew += 0.1 * np.sqrt(np.sum(np.square(agent.state.p_pos - adv.state.p_pos)))
         if agent.collide:
@@ -181,7 +181,7 @@ class Scenario(BaseScenario):
                     rew -= 10
         return rew
 
-    def adversary_reward(self, agent, world):
+    def group2_reward(self, agent, world):
         # Adversaries are rewarded for collisions with agents
         rew = 0
         shape = False #!False 
