@@ -50,7 +50,6 @@ class Scenario(BaseScenario):
     def make_world(self):
         world = World()
         # set any world properties first
-        world.dim_c = 0
         num_of_group1 = 10
         num_of_group2 = 10
         num_agents = num_of_group2 + num_of_group1
@@ -104,7 +103,6 @@ class Scenario(BaseScenario):
                 agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0.7,0])
  
             agent.state.p_vel = np.zeros(world.dim_p)
-            agent.state.c = np.zeros(world.dim_c)
         
         for i, landmark in enumerate(world.landmarks): #! position of the walls
             landmark.state.p_pos = np.array(grid2pos(grid1, 0.2))[i]
