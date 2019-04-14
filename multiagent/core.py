@@ -20,26 +20,21 @@ class EntityState(object):
         # physical velocity
         self.p_vel = None
 
-# state of agents (including communication and internal/mental state)
 class AgentState(EntityState):
     '''
-    Addition to entity state it has a communication state
+    Same as entity state
     '''
     def __init__(self):
         super(AgentState, self).__init__()
-        # communication utterance
-        self.c = None
 
 #! action of the agent
 class Action(object):
     '''
-    Physical and communication action
+    Physical action
     '''
     def __init__(self):
         # physical action
         self.u = None
-        # communication action
-        self.c = None
 
 #! properties and state of physical world entity
 class Entity(object):
@@ -83,6 +78,13 @@ class Landmark(Entity):
         # self.pos = pos
         self.shape = shape
     
+def isIn(agentpos,area):
+    if(area[0] <= agentpos[0] and\
+       agentpos[0] <= area[1] and\
+       area[2] <= agentpos[1] and\
+       agentpos[1] <= area[3]):
+       return True
+    return False
 
 #! properties of agent entities
 class Agent(Entity):
@@ -90,14 +92,10 @@ class Agent(Entity):
         super(Agent, self).__init__()
         # agents are movable by default
         self.movable = True
-        # cannot send communication signals
-        self.silent = False
         # cannot observe the world
         self.blind = False
         # physical motor noise amount
         self.u_noise = None
-        # communication noise amount
-        self.c_noise = None
         # control range
         self.u_range = 1.0
         # state
@@ -118,13 +116,6 @@ class Agent(Entity):
             self.movable = False
             self.collide = False
 
-def isIn(agentpos,area):
-    if(area[0] <= agentpos[0] and\
-       agentpos[0] <= area[1] and\
-       area[2] <= agentpos[1] and\
-       agentpos[1] <= area[3]):
-       return True
-    return False
 
 # multi-agent world
 class World(object):
@@ -132,8 +123,6 @@ class World(object):
         # list of agents and entities (can change at execution-time!)
         self.agents = []
         self.landmarks = []
-        # communication channel dimensionality
-        self.dim_c = 0
         # position dimensionality
         self.dim_p = 2
         # color dimensionality
@@ -174,9 +163,10 @@ class World(object):
         p_force = self.apply_environment_force(p_force)
         # integrate physical state
         self.integrate_state(p_force)
+        
         # update agent state
         for agent in self.agents:
-            self.update_agent_state(agent)
+            if not agent.isDone: agent.isReached()
 
     # gather agent action forces
     def apply_action_force(self, p_force):
@@ -218,14 +208,6 @@ class World(object):
                     entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
                                                                   np.square(entity.state.p_vel[1])) * entity.max_speed
             entity.state.p_pos += entity.state.p_vel * self.dt
-
-    def update_agent_state(self, agent):
-        # set communication state (directly for now)
-        if agent.silent:
-            agent.state.c = np.zeros(self.dim_c)
-        else:
-            noise = np.random.randn(*agent.action.c.shape) * agent.c_noise if agent.c_noise else 0.0
-            agent.state.c = agent.action.c + noise      
 
     #! Collision was wrong for square objects, reformulated it 
     # get collision forces for any contact between two entities

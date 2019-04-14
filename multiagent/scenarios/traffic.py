@@ -109,7 +109,8 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks): #! position of the walls
             landmark.state.p_pos = np.array(grid2pos(grid1, 0.2))[i]
             landmark.state.p_vel = np.zeros(world.dim_p)
-
+   
+    #! Can use collision detection in step
     def benchmark_data(self, agent, world):
         # returns number of collisions
         if agent.group2:
