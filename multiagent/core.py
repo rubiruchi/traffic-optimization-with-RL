@@ -106,6 +106,25 @@ class Agent(Entity):
         self.action = Action()
         # script behavior to execute
         self.action_callback = None
+        # does it reached its destination
+        self.isDone = False
+        # it's destination
+        self.destination = [0,0,0,0]
+
+    def isReached(self):
+        if isIn(self.state.p_pos,self.destination):
+            print('It is in the area!')
+            self.isDone = True
+            self.movable = False
+            self.collide = False
+
+def isIn(agentpos,area):
+    if(area[0] <= agentpos[0] and\
+       agentpos[0] <= area[1] and\
+       area[2] <= agentpos[1] and\
+       agentpos[1] <= area[3]):
+       return True
+    return False
 
 # multi-agent world
 class World(object):

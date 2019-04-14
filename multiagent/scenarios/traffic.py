@@ -67,10 +67,10 @@ class Scenario(BaseScenario):
             #agent.accel = 20.0 if agent.group2 else 25.0
             # agent.max_speed = 1.0 if agent.group2 else 1.0
             #! fast agents shows wrong movements
-            if i%2 ==0 :
+            if i%2 == 0 :
                 agent.max_speed = 1.0/5  if agent.group2 else 1.0/5 
-            else:
-                agent.max_speed = 1.0/5 - 0.1 if agent.group2 else 1.0/5 - 0.1
+            else: #! for now, every agent has the same speed
+                agent.max_speed = 1.0/5 if agent.group2 else 1.0/5
         #! add landmarks vertical and horizontal
         world.landmarks = [Landmark('ver') for i in range(num_landmarks)]
         # print([(i, lan.pos) for i,lan in enumerate(world.landmarks) ])
@@ -80,7 +80,7 @@ class Scenario(BaseScenario):
             landmark.name = 'landmark %d' % i
             landmark.collide = True
             landmark.movable = False
-            landmark.size = 0#0.05
+            landmark.size = 0 #0.05
             landmark.boundary = False
             landmark.shape = (0.2, 0.2)
         # make initial conditions
@@ -108,31 +108,20 @@ class Scenario(BaseScenario):
         
         for i, landmark in enumerate(world.landmarks): #! position of the walls
             landmark.state.p_pos = np.array(grid2pos(grid1, 0.2))[i]
-
-            # if i > 5 : #horizontal
-            #     landmark.state.p_pos = np.array([0.635,((i-5)-1.5)/1.5])
-            # elif i > 3 : #horizontal
-            #     landmark.state.p_pos = np.array([-0.635,((i-3)-1.5)/1.5])
-           
-            # elif i > 1 : #vertical
-            #     landmark.state.p_pos = np.array([((i-1)-1.5)/1.5, 0.635])
-            # elif i > -1 : #vertical
-            #     landmark.state.p_pos = np.array([((i+1)-1.5)/1.5,-0.635])
-                # landmark.state.p_pos = np.array([0,0])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
         # returns number of collisions for group2 agent
         if agent.group2:
             collisions = 0
-            for ga in self.good_agents(world):
+            for ga in self.group1_agents(world):
                 if self.is_collision(ga, agent):
                     collisions += 1
             return collisions
 
         if not agent.group2:
             collisions = 0
-            for adv in self.adversaries(world):
+            for adv in self.group2_agents(world):
                 if self.is_collision(adv, agent):
                     collisions += 1
             return collisions
@@ -146,53 +135,53 @@ class Scenario(BaseScenario):
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
 
-    # return all agents that are not adversaries
-    def good_agents(self, world):
+    # return all agents that are group1
+    def group1_agents(self, world):
         return [agent for agent in world.agents if not agent.group2]
 
     # return all adversarial agents
-    def adversaries(self, world):
+    def group2_agents(self, world):
         return [agent for agent in world.agents if agent.group2]
 
 
     def reward(self, agent, world):
         # Agents are rewarded based on minimum agent distance to each landmark
-        main_reward = self.group2_reward(agent, world) if agent.group2 else self.agent_reward(agent, world)
+        main_reward = self.group2_reward(agent, world) if agent.group2 else self.group1_reward(agent, world)
         return main_reward
 
     def bound(self,x):
-        # agents are penalized for exiting the screen, so that they can be caught by the adversaries
+        # agents are penalized for exiting the screen, so that they can be caught by the group2_agents
         if x < 0.9:
             return 0
         
         return min(np.exp(2 * x - 2), 10)
 
-    def agent_reward(self, agent, world):
-        # Agents are negatively rewarded if caught by adversaries
+    def group1_reward(self, agent, world):
+        # Agents are negatively rewarded if caught by group2_agents
         rew = 0
         shape = False #!False
-        adversaries = self.adversaries(world)
+        group2_agents = self.group2_agents(world)
         if shape:  # reward can optionally be shaped (increased reward for increased distance from group2)
-            for adv in adversaries:
+            for adv in group2_agents:
                 rew += 0.1 * np.sqrt(np.sum(np.square(agent.state.p_pos - adv.state.p_pos)))
         if agent.collide:
-            for a in adversaries:
+            for a in group2_agents:
                 if self.is_collision(a, agent):
                     rew -= 10
         return rew
 
     def group2_reward(self, agent, world):
-        # Adversaries are rewarded for collisions with agents
+        # group2_agents are rewarded for collisions with agents
         rew = 0
         shape = False #!False 
-        agents = self.good_agents(world)
-        adversaries = self.adversaries(world)
+        agents = self.group1_agents(world)
+        group2_agents = self.group2_agents(world)
         if shape:  # reward can optionally be shaped (decreased reward for increased distance from agents)
-            for adv in adversaries:
+            for adv in group2_agents:
                 rew -= 0.1 * min([np.sqrt(np.sum(np.square(a.state.p_pos - adv.state.p_pos))) for a in agents])
         if agent.collide:
             for ag in agents:
-                for adv in adversaries:
+                for adv in group2_agents:
                     if self.is_collision(ag, adv):
                         rew += 10
         return rew
