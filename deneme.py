@@ -58,12 +58,14 @@ for i_episode in range(2):# number of simulations
         # my_action = sample_actions()
         
         next_state, reward, done, info = env.step(my_action)
-        print('*'*30)
-        print('next_state\n',next_state)
-        print('\nreward\n',reward)
-        print('\ndone\n',done)
-        print('\ninfo\n',info)
-        print('*'*30)
+       
+        # print('*'*30)
+        # print('next_state\n',next_state)
+        # print('\nreward\n',reward)
+        # print('\ndone\n',done)
+        # print('\ninfo\n',info)
+        # print('*'*30)
+
         # print(len(observation)) 
         # print(observation[0].shape) 
         # print(observation[0]) 

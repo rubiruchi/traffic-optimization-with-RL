@@ -78,9 +78,9 @@ class Landmark(Entity):
     '''
     Landmarks have an argument about their position hor or vec
     '''
-    def __init__(self, pos = 'ver', shape = (0.2, 0.8)):
+    def __init__(self, shape = (0.2, 0.8)):
         super(Landmark, self).__init__()
-        self.pos = pos
+        # self.pos = pos
         self.shape = shape
     
 
@@ -227,7 +227,7 @@ class World(object):
             noise = np.random.randn(*agent.action.c.shape) * agent.c_noise if agent.c_noise else 0.0
             agent.state.c = agent.action.c + noise      
 
-    #! Collision is wrong for square objects, need to reformulate this 
+    #! Collision was wrong for square objects, reformulated it 
     # get collision forces for any contact between two entities
     def get_collision_force(self, entity_a, entity_b):
         #get collision
@@ -235,66 +235,67 @@ class World(object):
             return [None, None] # not a collider
         if (entity_a is entity_b):
             return [None, None] # don't collide against itself
+
         #* if entity_a is a Agent & entity_b is a Landmark
-        if (isinstance(entity_a, Agent) and isinstance(entity_b, Landmark)):
-            # print(type(entity_a),type(entity_b) )
+        if (isinstance(entity_a, Agent) and isinstance(entity_b, Landmark)): 
             
-            if(entity_b.pos == 'ver'):
-                dumping = 0.001
-                delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
-                if(np.abs(delta_pos[0]) - dumping <= entity_b.shape[0]/2 + entity_a.size):
-                    if(np.abs(delta_pos[1]) <= entity_b.shape[1]/2 + entity_a.size):
-                    #* collison
-                        print('Collision')
-                        dist = np.sqrt(np.sum(np.square(delta_pos)))
-                        
-                        upperline = entity_b.state.p_pos[1] + entity_b.shape[1]/2
-                        lowerline = entity_b.state.p_pos[1] - entity_b.shape[1]/2
-                        rightline = entity_b.state.p_pos[0] + entity_b.shape[0]/2
-                        leftline  = entity_b.state.p_pos[0] - entity_b.shape[0]/2
+            dumping = 0.001
+            delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
+            if(np.abs(delta_pos[0]) - dumping <= entity_b.shape[0]/2 + entity_a.size):
+                if(np.abs(delta_pos[1]) <= entity_b.shape[1]/2 + entity_a.size):
+                #* collison
+                    # print('Collision with wall')
+                    dist = np.sqrt(np.sum(np.square(delta_pos)))
                     
-                        #* if horizontal collision
-                        if(leftline <= entity_a.state.p_pos[0] and \
-                            rightline >= entity_a.state.p_pos[0]):
-                            #* apply horizontal force
-                            # minimum allowable distance
-                            dist_min = entity_a.size + entity_b.shape[1] + dumping
-                            # softmax penetration
-                            k = self.contact_margin
-                            penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
-                            force = 2*(self.contact_force * delta_pos / dist * penetration)
-                            force_a = np.array([0,force[1]])  if entity_a.movable else None
-                            force_b = np.zeros(2)
-                            return [force_a, force_b] 
-                            #*change horizontal velocity
-                            # entity_a.state.p_vel = entity_a.state.p_vel*[-1e5,1]
+                    upperline = entity_b.state.p_pos[1] + entity_b.shape[1]/2
+                    lowerline = entity_b.state.p_pos[1] - entity_b.shape[1]/2
+                    rightline = entity_b.state.p_pos[0] + entity_b.shape[0]/2
+                    leftline  = entity_b.state.p_pos[0] - entity_b.shape[0]/2
+                
+                    #* if horizontal collision
+                    if(leftline <= entity_a.state.p_pos[0] and \
+                        rightline >= entity_a.state.p_pos[0]):
 
-                        #* if vertical collision
-                        if(lowerline <= entity_a.state.p_pos[1] and \
-                            upperline >= entity_a.state.p_pos[1]):
-                            #* apply vertical force
-                            # minimum allowable distance
-                            dist_min = entity_a.size + entity_b.shape[0] + dumping
-                            # softmax penetration
-                            k = self.contact_margin
-                            penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
-                            force = 2*(self.contact_force * delta_pos / dist * penetration)
-                            force_a = np.array([force[0],0])  if entity_a.movable else None
-                            force_b = np.zeros(2)
-                            return [force_a, force_b]
-                            #*change vertical velocity
-                            # entity_a.state.p_vel = entity_a.state.p_vel*[1,-1e5]
+                        #* apply horizontal force
+                        # minimum allowable distance
+                        dist_min = entity_a.size + entity_b.shape[1] + dumping
+                        # softmax penetration
+                        k = self.contact_margin
+                        penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+                        force = 2*(self.contact_force * delta_pos / dist * penetration)
+                        force_a = np.array([0,force[1]])  if entity_a.movable else None
+                        force_b = np.zeros(2)
+                        return [force_a, force_b] 
+                        #*change horizontal velocity
+                        # entity_a.state.p_vel = entity_a.state.p_vel*[-1e5,1]
 
-                        pass
-            if(entity_b.pos == 'hor'):
-                pass
+                    #* if vertical collision
+                    if(lowerline <= entity_a.state.p_pos[1] and \
+                        upperline >= entity_a.state.p_pos[1]):
+                        
+                        #* apply vertical force
+                        # minimum allowable distance
+                        dist_min = entity_a.size + entity_b.shape[0] + dumping
+                        # softmax penetration
+                        k = self.contact_margin
+                        penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+                        force = 2*(self.contact_force * delta_pos / dist * penetration)
+                        force_a = np.array([force[0],0])  if entity_a.movable else None
+                        force_b = np.zeros(2)
+                        return [force_a, force_b]
+                    pass
         #* if entity_a is a Agent & entity_b is a Agent
         if (isinstance(entity_a, Agent) and isinstance(entity_b, Agent)):
+
             # compute actual distance between entities
             delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
             dist = np.sqrt(np.sum(np.square(delta_pos)))
             # minimum allowable distance
             dist_min = entity_a.size + entity_b.size
+            #* collison
+            if(dist<dist_min):
+                # print('Collision with agent')
+                pass
             # softmax penetration
             k = self.contact_margin
             penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
