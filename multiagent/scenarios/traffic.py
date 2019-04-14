@@ -5,18 +5,23 @@ import sys
 from grid_to_map import *
 
 #* map 
+
 grid1 = np.array([
-	[0,0,0,1,0,0,1,0,0,0],
-	[0,0,0,1,0,0,1,0,0,0],
-	[0,0,0,1,0,0,1,0,0,0],
-	[1,1,1,1,0,0,1,1,1,1],
-	[0,0,0,0,0,0,0,0,0,0],
-	[0,0,0,0,0,0,0,0,0,0],
-	[1,1,1,1,0,0,1,1,1,1],
-	[0,0,0,1,0,0,1,0,0,0],
-	[0,0,0,1,0,0,1,0,0,0],
-	[0,0,0,1,0,0,1,0,0,0]
-]) 
+    [0,0,0,0,1,1,1,1,0,0,0,0],
+	[0,0,0,0,1,0,0,1,0,0,0,0],
+	[0,0,0,0,1,0,0,1,0,0,0,0],
+	[0,0,0,0,1,0,0,1,0,0,0,0],
+	[1,1,1,1,1,0,0,1,1,1,1,1],
+	[1,0,0,0,0,0,0,0,0,0,0,1],
+	[1,0,0,0,0,0,0,0,0,0,0,1],
+	[1,1,1,1,1,0,0,1,1,1,1,1],
+	[0,0,0,0,1,0,0,1,0,0,0,0],
+	[0,0,0,0,1,0,0,1,0,0,0,0],
+	[0,0,0,0,1,0,0,1,0,0,0,0],
+    [0,0,0,0,1,1,1,1,0,0,0,0]
+
+])
+
 grid2 = np.array([
 	[0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,1,1,0,0,0,0],
@@ -193,21 +198,26 @@ class Scenario(BaseScenario):
         return rew
 
     def observation(self, agent, world):
-        # get positions of all entities in this agent's reference frame
+        # agent-lanmark
         entity_pos = []
         for entity in world.landmarks:
             if not entity.boundary:
+                #position of lanmark relative to the agent
                 entity_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # communication of all other agents
-        comm = []
+        # agent-agent
         other_pos = []
         other_vel = []
         for other in world.agents:
-            if other is agent: continue
-            comm.append(other.state.c)
+            if other is agent: continue #no interaction with itself
+            #position of other agent relative to the agent
             other_pos.append(other.state.p_pos - agent.state.p_pos)
-            # if not other.adversary:
-            other_vel.append(other.state.p_vel)
+            #velocity of other agent relative to the agent
+            other_vel.append(other.state.p_vel - agent.state.p_vel)
+        
+        # [agent's velocity(2d vector) + agent's position(2d vector) +
+        # landmark's relative position(k*2d vector)
+        # other agent's relative position((n-1)*2d vector) +
+        # other agent's relative velocity((n-1)*2d vector)) ]
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel)
 
     

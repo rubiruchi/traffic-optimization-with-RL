@@ -3,7 +3,7 @@ import numpy as np
 def grid2pos(occurence_matrix, size):
 	dimx, dimy = occurence_matrix.shape[0], occurence_matrix.shape[1]
 	assert(dimx == dimy)
-	assert(dimx*size==2)
+	assert((dimx-2)*size==2)
 	midx, midy = dimx//2, dimy//2
 	positions = []
 	for i in range(dimx):

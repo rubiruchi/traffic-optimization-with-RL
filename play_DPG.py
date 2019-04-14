@@ -18,9 +18,11 @@ tf.set_random_seed(1)
 env = make_env_.make_env('traffic', benchmark=True)
 
 num_of_agents = env.n
+num_of_walls = len(env.world.landmarks)
 
-state_size = (2+2+2*(num_of_agents-1)*2)
+state_size = (2+2+2*(num_of_walls)+2*(num_of_agents-1)*2)
 # [agent's velocity(2d vector) + agent's position(2d vector) +
+# landmark's relative position(k*2d vector)
 # other agent's relative position((n-1)*2d vector) +
 # other agent's relative velocity((n-1)*2d vector)) ]
 
