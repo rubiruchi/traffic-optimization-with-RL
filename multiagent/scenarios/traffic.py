@@ -114,12 +114,10 @@ class Scenario(BaseScenario):
    
     #! Can use collision detection in step
     def benchmark_data(self, agent, world):
-        # returns number of collisions
-        collisions = 0
-        for agent in world.agents:
-            if agent.isCollided: collisions+=1;
-        
-        return collisions//2
+        # returns number of collisions        
+        if agent.isCollided:
+            return 1
+        return 0
 
 
     # return all agents that are group1

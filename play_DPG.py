@@ -33,7 +33,7 @@ testing = True  # render or not, expodation vs. exploration
 render = True
 
 n_episodes = 2000 if not testing else 3  # number of simulations
-n_steps = 200 if not testing else 1000  # number of steps
+n_steps = 300 if not testing else 300  # number of steps
 
 load_episode = 1500
 
@@ -144,11 +144,14 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
         losses[i] = loss
     # ────────────────────────────────────────────────────────────────────────────────
 
-    print("\n episode: {}/{}, collisions: {}, \
-    rewards: {:.2f}|{:.2f}|{:.2f},\
+    print("\n episode: {}/{}, \
+    collisions: {}|{}|{}, \
+    rewards: {:.2f}|{:.2f}|{:.2f}, \
     losses: {:.2f}|{:.2f}|{:.2f}".format(episode,
                                          n_episodes,
                                          collisions[0],
+                                         collisions[1],
+                                         collisions[2],
                                          rewards_[0],
                                          rewards_[1],
                                          rewards_[2],

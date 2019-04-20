@@ -10,7 +10,7 @@ import pandas as pd
 # plt.style.use('seaborn')
 
 # creates an multiagent environment which has reset, render, step
-env = make_env_.make_env('traffic')  # ! 2vs1 Swarm environment
+env = make_env_.make_env('traffic',benchmark=True)  # ! 2vs1 Swarm environment
 # env = make_env_.make_env('simple_tag_guided_1v2')
 # create interactive policies for each agent
 # policies = [InteractivePolicy(env,i) for i in range(env.n)]
@@ -71,9 +71,9 @@ for i_episode in range(3):  # number of simulations
         next_state, reward, done, info = env.step(my_action)
 
         for agent in env.agents:
-            if(agent.isCollided):
-                print('-'*5)
-                print('collided!')
+            # if(agent.isCollided):
+                # print('-'*5)
+                # print('collided!')
             agent.isCollided = False
             
 
@@ -82,7 +82,7 @@ for i_episode in range(3):  # number of simulations
         # print('\nreward\n',reward)
         rewards.append(reward)
         # print('\ndone\n',done)
-        # print('\ninfo\n',info)
+        print('\ninfo\n',info)
         # print('*'*30)
 
         # print(len(observation))
