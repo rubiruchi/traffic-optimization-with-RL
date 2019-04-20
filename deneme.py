@@ -47,7 +47,7 @@ def fixed2():
 	return act
 
 
-for i_episode in range(2):# number of simulations 
+for i_episode in range(3):# number of simulations 
     observation = env.reset()
     # print(len(observation[0]))
     for t in range(150):# number of steps

@@ -107,13 +107,13 @@ class Agent(Entity):
         # does it reached its destination
         self.isDone = False
         # it's destination
-        self.destination = [0,0,0,0]
+        self.destination = [1]*4 #[-0.2,0.2,-0.2,0.2]
 
     def isReached(self):
         if isIn(self.state.p_pos,self.destination):
-            print('It is in the area!')
+            # print('It is in the area!')
             self.isDone = True
-            self.movable = False
+            # self.movable = False
             self.collide = False
 
 
@@ -248,9 +248,7 @@ class World(object):
                         force_a = np.array([0,force[1]])  if entity_a.movable else None
                         force_b = np.zeros(2)
                         return [force_a, force_b] 
-                        #*change horizontal velocity
-                        # entity_a.state.p_vel = entity_a.state.p_vel*[-1e5,1]
-
+                        
                     #* if vertical collision
                     if(lowerline <= entity_a.state.p_pos[1] and \
                         upperline >= entity_a.state.p_pos[1]):

@@ -88,10 +88,12 @@ class Scenario(BaseScenario):
 
 
     def reset_world(self, world):
-        # random properties for agents
+        
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.35, 0.85, 0.35]) if not agent.group2 else np.array([0.85, 0.35, 0.35])
-            # random properties for landmarks
+            #! isDone is reset back to false and make it collidable
+            agent.isDone = False
+            agent.collide = True
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
@@ -99,8 +101,10 @@ class Scenario(BaseScenario):
             if agent.group2: #! position of the agents
                 # agent.state.p_pos = np.array([-1,0]) + agent.size
                 agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0,0.7])
-            else:
+                agent.destination = [-0.2,0.2,-1,-0.8] #! destination of the agents in group2
+            else: #group1
                 agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0.7,0])
+                agent.destination = [-1,-0.8,-0.2,0.2] #! destination of the agents in group1
  
             agent.state.p_vel = np.zeros(world.dim_p)
         
