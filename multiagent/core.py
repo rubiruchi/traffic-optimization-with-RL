@@ -104,6 +104,8 @@ class Agent(Entity):
         self.action = Action()
         # script behavior to execute
         self.action_callback = None
+        # is it collided
+        self.isCollided = False
         # does it reached its destination
         self.isDone = False
         # it's destination
@@ -164,7 +166,7 @@ class World(object):
         # integrate physical state
         self.integrate_state(p_force)
         
-        # update agent state
+        # update agent state(isDone,collide)
         for agent in self.agents:
             if not agent.isDone: agent.isReached()
 
@@ -224,8 +226,10 @@ class World(object):
             dumping = 0.001
             delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
             if(np.abs(delta_pos[0]) - dumping <= entity_b.shape[0]/2 + entity_a.size):
-                if(np.abs(delta_pos[1]) <= entity_b.shape[1]/2 + entity_a.size):
-                #* collison
+                if(np.abs(delta_pos[1]) - dumping <= entity_b.shape[1]/2 + entity_a.size):
+                    #* collison
+                    entity_a.isCollided = True
+
                     # print('Collision with wall')
                     dist = np.sqrt(np.sum(np.square(delta_pos)))
                     
@@ -275,6 +279,9 @@ class World(object):
             #* collison
             if(dist<dist_min):
                 # print('Collision with agent')
+                entity_a.isCollided = True
+                entity_b.isCollided = True
+
                 pass
             # softmax penetration
             k = self.contact_margin

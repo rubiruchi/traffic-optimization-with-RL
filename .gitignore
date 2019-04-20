@@ -126,3 +126,9 @@ dmypy.json
 multiagent/__pycache__/core.cpython-36.pyc
 multiagent/__pycache__/environment.cpython-36.pyc
 multiagent/scenarios/__pycache__/swarm2.cpython-36.pyc
+
+# csv files
+*.csv
+
+# png files
+*.png

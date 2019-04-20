@@ -115,28 +115,12 @@ class Scenario(BaseScenario):
     #! Can use collision detection in step
     def benchmark_data(self, agent, world):
         # returns number of collisions
-        if agent.group2:
-            collisions = 0
-            for g1 in self.group1_agents(world):
-                if self.is_collision(g1, agent):
-                    collisions += 1
-            return collisions
+        collisions = 0
+        for agent in world.agents:
+            if agent.isCollided: collisions+=1;
+        
+        return collisions//2
 
-        if not agent.group2:
-            collisions = 0
-            for g2 in self.group2_agents(world):
-                if self.is_collision(g2, agent):
-                    collisions += 1
-            return collisions
-        else:
-            return -1
-
-
-    def is_collision(self, agent1, agent2):
-        delta_pos = agent1.state.p_pos - agent2.state.p_pos
-        dist = np.sqrt(np.sum(np.square(delta_pos)))
-        dist_min = agent1.size + agent2.size
-        return True if dist < dist_min else False
 
     # return all agents that are group1
     def group1_agents(self, world):
@@ -148,23 +132,20 @@ class Scenario(BaseScenario):
 
 
     def reward(self, agent, world):
-        # Agents are rewarded based on minimum distance to each landmark
-        main_reward = self.group_reward(agent, world)
-        return main_reward
+        # Reward for an agent: 2 - current distance between agent and its destination 
+        if agent.isDone:
+            return 2
+        delta = ((agent.state.p_pos[0] - (agent.destination[0] + agent.destination[1])/2)**2 +\
+                (agent.state.p_pos[1] - (agent.destination[2] + agent.destination[3])/2)**2)**1/2
+        
+        reward = 2 - delta
 
-    def group_reward(self, agent, world):
-        # Agents are negatively rewarded if caught by group2_agents
-        rew = 0
-        shape = False #!False
-        group2_agents = self.group2_agents(world)
-        if shape:  # reward can optionally be shaped (increased reward for increased distance from group2)
-            for g2 in group2_agents:
-                rew += 0.1 * np.sqrt(np.sum(np.square(agent.state.p_pos - g2.state.p_pos)))
-        if agent.collide:
-            for a in group2_agents:
-                if self.is_collision(a, agent):
-                    rew -= 10
-        return rew
+        if agent.isCollided:
+            reward -= 1
+
+        return reward
+
+    
 
     def observation(self, agent, world):
         # agent-lanmark
