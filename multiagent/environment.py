@@ -209,19 +209,24 @@ class MultiAgentEnv(gym.Env):
             self.render_geoms = []
             self.render_geoms_xform = []
             for entity in self.world.entities:
+                xform = rendering.Transform()
                 # line = None
                 #! render landmark according to their position 
                 if entity in self.world.landmarks:
                     w, h = entity.shape
                     w_half, h_half = w/2, h/2
                     geom = rendering.make_polygon([[w_half,-h_half],[w_half,h_half],[-w_half,h_half],[-w_half,-h_half]])
-                else: 
+                else: #! render agents according to their position 
                     geom = rendering.make_circle(entity.size)
-                    # line = rendering.make_polygon([[4*entity.size,-0.01],[4*entity.size,0.01],[entity.size,0.01],[entity.size,-0.01] ])
-                xform = rendering.Transform()
+                    #! render sensor readings
+                    for sensor in entity.sensors:
+                        s = rendering.make_circle(entity.size/4, x=sensor[0],y=sensor[1])
+                        s.set_color(*entity.color, alpha=0.5)
+                        s.add_attr(xform)
+                        self.render_geoms.append(s)
+
                 if 'agent' in entity.name:
                     geom.set_color(*entity.color, alpha=0.5)
-                    # if line:line.set_color(*entity.color, alpha=0.5)
                 else:
                     geom.set_color(*entity.color)
                     
