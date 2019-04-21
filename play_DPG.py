@@ -29,15 +29,15 @@ state_size = (2+2+2*(num_of_walls)+2*(num_of_agents-1)*2)
 
 action_size = 4  # discrete action space [up,down,left,right]
 
-testing = True  # render in testing
-render = True
+testing = False  # render in testing
+render = False
 
 n_episodes = 1000 if not testing else 3  # number of simulations
 n_steps = 300 if not testing else 300  # number of steps
 
-load_episode = 150
+load_episode = 0
 
-output_dir = 'model_output/traffic/DPG_10v10'
+output_dir = 'model_output/traffic/DPG_2v2'
 
 # # ────────────────────────────────────────────────────────────────────────────────
 # if testing:

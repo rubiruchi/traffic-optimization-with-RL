@@ -50,8 +50,8 @@ class Scenario(BaseScenario):
     def make_world(self):
         world = World()
         # set any world properties first
-        num_of_group1 = 10
-        num_of_group2 = 10
+        num_of_group1 = 2#10
+        num_of_group2 = 2#10
         num_agents = num_of_group2 + num_of_group1
         num_landmarks = getnumberofwall(grid1)
         # add agents
