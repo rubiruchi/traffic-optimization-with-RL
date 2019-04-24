@@ -3,7 +3,7 @@ from gym import spaces
 from gym.envs.registration import EnvSpec
 import numpy as np
 from multiagent.multi_discrete import MultiDiscrete
-
+import copy
 # environment for all agents in the multiagent world
 # currently code assumes that no agents will be created/destroyed at runtime!
 
@@ -209,7 +209,7 @@ class MultiAgentEnv(gym.Env):
             self.render_geoms = []
             self.render_geoms_xform = []
             for entity in self.world.entities:
-                xform = rendering.Transform()
+                # xform = rendering.Transform()
                 # line = None
                 #! render landmark according to their position 
                 if entity in self.world.landmarks:
@@ -219,22 +219,37 @@ class MultiAgentEnv(gym.Env):
                 else: #! render agents according to their position 
                     geom = rendering.make_circle(entity.size)
                     #! render sensor readings
-                    for sensor in entity.sensors:
-                        s = rendering.make_circle(entity.size/4, x=sensor[0],y=sensor[1])
-                        s.set_color(*entity.color, alpha=0.5)
-                        s.add_attr(xform)
-                        self.render_geoms.append(s)
-
+                    # sensor1, sensor2, sensor3, sensor4 = entity.sensors(self.world)
+                    # sens1 = rendering.make_circle(entity.size/4, x=sensor1[0],y=sensor1[1])
+                    # sens2 = rendering.make_circle(entity.size/4, x=sensor2[0],y=sensor2[1])
+                    # sens3 = rendering.make_circle(entity.size/4, x=sensor3[0],y=sensor3[1])
+                    # sens4 = rendering.make_circle(entity.size/4, x=sensor4[0],y=sensor4[1])
+                    
+                xform = rendering.Transform()
                 if 'agent' in entity.name:
                     geom.set_color(*entity.color, alpha=0.5)
+                    # sens1.set_color(*entity.color, alpha=0.5)
+                    # sens2.set_color(*entity.color, alpha=0.5)
+                    # sens3.set_color(*entity.color, alpha=0.5)
+                    # sens4.set_color(*entity.color, alpha=0.5)
                 else:
                     geom.set_color(*entity.color)
                     
                 geom.add_attr(xform)
+                # sens1.add_attr(xform)
+                # sens2.add_attr(xform)
+                # sens3.add_attr(xform)
+                # sens4.add_attr(xform)
                 # if line:line.add_attr(xform)
                 self.render_geoms.append(geom)
+                # self.render_geoms.append(sens1)
+                # self.render_geoms.append(sens2)
+                # self.render_geoms.append(sens3)
+                # self.render_geoms.append(sens4)
+
                 # if line:self.render_geoms.append(line)
                 self.render_geoms_xform.append(xform)
+
 
             # add geoms to viewer
             for viewer in self.viewers:
@@ -253,10 +268,10 @@ class MultiAgentEnv(gym.Env):
                 pos = self.agents[i].state.p_pos
             self.viewers[i].set_bounds(
                 pos[0]-cam_range, pos[0]+cam_range, pos[1]-cam_range, pos[1]+cam_range)
-            # update geometry positions
+            #! update geometry positions
             for e, entity in enumerate(self.world.entities):
                 self.render_geoms_xform[e].set_translation(*entity.state.p_pos)
-            # render to display or array
+            #! render to display or array
             results.append(self.viewers[i].render(
                 return_rgb_array=mode == 'rgb_array'))
 

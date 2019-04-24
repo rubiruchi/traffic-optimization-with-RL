@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario
 import sys
@@ -50,8 +51,8 @@ class Scenario(BaseScenario):
     def make_world(self):
         world = World()
         # set any world properties first
-        num_of_group1 = 2#10
-        num_of_group2 = 2#10
+        num_of_group1 = 5
+        num_of_group2 = 5
         num_agents = num_of_group2 + num_of_group1
         num_landmarks = getnumberofwall(grid1)
         # add agents
@@ -143,29 +144,131 @@ class Scenario(BaseScenario):
 
         return reward
 
-    
-
     def observation(self, agent, world):
-        # agent-lanmark
-        entity_pos = []
-        for entity in world.landmarks:
-            if not entity.boundary:
-                #position of lanmark relative to the agent
-                entity_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # agent-agent
-        other_pos = []
-        other_vel = []
-        for other in world.agents:
-            if other is agent: continue #no interaction with itself
-            #position of other agent relative to the agent
-            other_pos.append(other.state.p_pos - agent.state.p_pos)
-            #velocity of other agent relative to the agent
-            other_vel.append(other.state.p_vel - agent.state.p_vel)
-        
-        # [agent's velocity(2d vector) + agent's position(2d vector) +
-        # landmark's relative position(k*2d vector)
-        # other agent's relative position((n-1)*2d vector) +
-        # other agent's relative velocity((n-1)*2d vector)) ]
-        return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel)
+        '''
+        Agent's observation is just it's 4 sensor measurements
+        '''
+        wall_positions = [l.state.p_pos for l in world.give_landmarks]
+        wall_length = world.give_landmarks[0].shape[0]
+        agent_position = agent.state.p_pos
+        agent_radius = agent.size 
+        max_sensor_dist = agent.s_dist
+
+        res = getsensormeasurements(wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist)
+        # print('-'*50)
+        # print(np.array(res))
+
+        return np.array(res)
+
+#! Helper functions for sensor measurements
+def getline(wall_position, wall_length):
+    # line order: left,right,down,up
+    # line format [x,y] as either fixed x or fixed y
+    line1 = np.array([wall_position[0]-wall_length/2, None], dtype='double')
+    line2 = np.array([wall_position[0]+wall_length/2, None], dtype='double')
+    line3 = np.array([None, wall_position[1]-wall_length/2], dtype='double')
+    line4 = np.array([None, wall_position[1]+wall_length/2], dtype='double')
+
+    return([line1, line2, line3, line4])
+
+def getsensormeasurements_(wall_position, wall_length, agent_position, agent_radius, max_sensor_dist):
+    '''
+    Returns an array of sensor measurements (distances) in form of: [left,right,down,up]
+    Looks for walls
+    '''
+    measurements = [max_sensor_dist]*4
+    # calculations start
+    [line1, line2, line3, line4] = getline(wall_position, wall_length)
+
+    # left sensor
+    if (wall_position[1] - agent_position[1])**2 < (wall_length/2)**2:
+        dist1 = agent_position[0] - line2[0]
+        if dist1 > 0:
+            if dist1 < max_sensor_dist:
+                measurements[0] = dist1
+
+    # right sensor
+    if (wall_position[1] - agent_position[1])**2 < (wall_length/2)**2:
+        dist2 = line1[0] - agent_position[0]
+        if dist2 > 0:
+            if dist2 < max_sensor_dist:
+                measurements[1] = dist2
+
+    # down sensor
+    if (wall_position[0] - agent_position[0])**2 < (wall_length/2)**2:
+        dist3 = agent_position[1] - line4[1]
+        if dist3 > 0:
+            if dist3 < max_sensor_dist:
+                measurements[2] = dist3
+
+    # up sensor
+    if (wall_position[0] - agent_position[0])**2 < (wall_length/2)**2:
+        dist4 = line3[1] - agent_position[1]
+        if dist4 > 0:
+            if dist4 < max_sensor_dist:
+                measurements[3] = dist4
+
+    # calculations end
+    return measurements
+
+def getsensormeasurements_2(other_agent_pos, agent_position, agent_radius, max_sensor_dist):
+    '''
+    Returns an array of sensor measurements (distances) in form of: [left,right,down,up]
+    Looks for other agents
+    '''
+    measurements = [max_sensor_dist]*4
+    
+    # left sensor
+    if (other_agent_pos[1] - agent_position[1])**2 < (agent_radius)**2:
+        c =  agent_position - other_agent_pos
+        b = c[0]
+        a = c[1]
+        dist1 = b - math.sqrt(agent_radius**2 - a**2) 
+        if dist1 > 0:
+            if dist1 < max_sensor_dist:
+                measurements[0] = dist1
+
+    # right sensor
+    if (other_agent_pos[1] - agent_position[1])**2 < (agent_radius)**2:
+        c =  other_agent_pos - agent_position
+        b = c[0]
+        a = c[1]
+        dist2 = b - math.sqrt(agent_radius**2 - a**2) 
+        if dist2 > 0:
+            if dist2 < max_sensor_dist:
+                measurements[1] = dist2
+
+    # down sensor
+    if (other_agent_pos[0] - agent_position[0])**2 < (agent_radius)**2:
+        c =  agent_position - other_agent_pos
+        b = c[1]
+        a = c[0]
+        dist3 = b - math.sqrt(agent_radius**2 - a**2) 
+        if dist3 > 0:
+            if dist3 < max_sensor_dist:
+                measurements[2] = dist3
+
+    # up sensor
+    if (other_agent_pos[0] - agent_position[0])**2 < (agent_radius)**2:
+        c =  other_agent_pos - agent_position
+        b = c[1]
+        a = c[0]
+        dist4 = b - math.sqrt(agent_radius**2 - a**2) 
+        if dist4 > 0:
+            if dist4 < max_sensor_dist:
+                measurements[3] = dist4
+                
+    return measurements
+
+def getsensormeasurements(wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist):
+    '''
+    Returns an array of sensor measurements (distances) in form of: [left,right,down,up]
+    '''
+    measurements = [max_sensor_dist]*4
+    # calculations start
+    meas = np.array([getsensormeasurements_(w_pos, wall_length, agent_position,
+                                            agent_radius, max_sensor_dist) for w_pos in wall_positions])
+    # calculations end
+    return meas.min(axis=0)
 
     

@@ -9,6 +9,7 @@ Agent
 
 import numpy as np
 import sys
+import pprint
 # physical/external base state of all entites
 
 
@@ -86,7 +87,7 @@ class Landmark(Entity):
     Landmarks have an argument about their position hor or vec
     '''
 
-    def __init__(self, shape=(0.2, 0.8)):
+    def __init__(self, shape=[0.2, 0.2]):
         super(Landmark, self).__init__()
         # self.pos = pos
         self.shape = shape
@@ -100,8 +101,71 @@ def isIn(agentpos, area):
         return True
     return False
 
-#! properties of agent entities
+#! Helper functions for sensor measurements
 
+def getline(wall_position, wall_length):
+    # line order: left,right,down,up
+    # line format [x,y] as either fixed x or fixed y
+    line1 = np.array([wall_position[0]-wall_length/2, None], dtype='double')
+    line2 = np.array([wall_position[0]+wall_length/2, None], dtype='double')
+    line3 = np.array([None, wall_position[1]-wall_length/2], dtype='double')
+    line4 = np.array([None, wall_position[1]+wall_length/2], dtype='double')
+
+    return([line1, line2, line3, line4])
+
+
+def getsensormeasurements_(wall_position, wall_length, agent_position, agent_radius, max_sensor_dist):
+    '''
+    Returns an array of sensor measurements (distances) in form of: [left,right,down,up]
+    '''
+    measurements = [max_sensor_dist]*4
+    # calculations start
+    [line1, line2, line3, line4] = getline(wall_position, wall_length)
+
+    # left sensor
+    if (wall_position[1] - agent_position[1])**2 < (wall_length/2)**2:
+        dist1 = agent_position[0] - line2[0]
+        if dist1 > 0:
+            if dist1 < max_sensor_dist:
+                measurements[0] = dist1
+
+    # right sensor
+    if (wall_position[1] - agent_position[1])**2 < (wall_length/2)**2:
+        dist2 = line1[0] - agent_position[0]
+        if dist2 > 0:
+            if dist2 < max_sensor_dist:
+                measurements[1] = dist2
+
+    # down sensor
+    if (wall_position[0] - agent_position[0])**2 < (wall_length/2)**2:
+        dist3 = agent_position[1] - line4[1]
+        if dist3 > 0:
+            if dist3 < max_sensor_dist:
+                measurements[2] = dist3
+
+    # up sensor
+    if (wall_position[0] - agent_position[0])**2 < (wall_length/2)**2:
+        dist4 = line3[1] - agent_position[1]
+        if dist4 > 0:
+            if dist4 < max_sensor_dist:
+                measurements[3] = dist4
+
+    # calculations end
+    return measurements
+
+
+def getsensormeasurements(wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist):
+    '''
+    Returns an array of sensor measurements (distances) in form of: [left,right,down,up]
+    '''
+    measurements = [max_sensor_dist]*4
+    # calculations start
+    meas = np.array([getsensormeasurements_(w_pos, wall_length, agent_position,
+                                            agent_radius, max_sensor_dist) for w_pos in wall_positions])
+    # calculations end
+    return meas.min(axis=0)
+
+#! properties of agent entities
 
 class Agent(Entity):
     def __init__(self):
@@ -128,9 +192,9 @@ class Agent(Entity):
         self.destination = [1]*4  # [-0.2,0.2,-0.2,0.2]
         # it's max sensor distances
         self.s_dist = 0.1
-        
 
     # check if the agent reached it's destination
+
     def isReached(self):
         if isIn(self.state.p_pos, self.destination):
             # print('It is in the area!')
@@ -138,21 +202,26 @@ class Agent(Entity):
             # self.movable = False
             self.collide = False
 
-    @property
+  
+    # @property
     #! return it's sensors readings
-    def sensors(self):
-        sensors = [ [- self.s_dist,0],
-                    [+ self.s_dist,0], 
-                    [0,- self.s_dist],
-                    [0,+ self.s_dist]]
-        return sensors
+    def sensors(self, world):
 
-    # send an array ray for a fixed distance
-    # def senseAround(self, world):
-    #     distances = []
-    #     for direction in range(4):
-    #         mindis = 0
-    #         for entites in world.entites:
+        wall_positions = [l.state.p_pos for l in world.give_landmarks]
+        wall_length = world.give_landmarks[0].shape[0]
+        agent_position = self.state.p_pos
+        agent_radius = self.size 
+        max_sensor_dist = self.s_dist
+
+        res = getsensormeasurements(wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist)
+
+        sensors = [[- res[0], 0],
+                   [+ res[1], 0],
+                   [0, - res[2]],
+                   [0, + res[3]]]
+
+        pprint.pprint(sensors)           
+        return sensors
 
 
 # multi-agent world
@@ -177,6 +246,14 @@ class World(object):
     @property
     def entities(self):
         return self.agents + self.landmarks
+
+    @property
+    def give_agents(self):
+        return self.agents
+
+    @property
+    def give_landmarks(self):
+        return self.landmarks
 
     # return all agents controllable by external policies
     @property

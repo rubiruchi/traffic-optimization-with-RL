@@ -14,8 +14,8 @@ env = make_env_.make_env('traffic',benchmark=True)  # ! 2vs1 Swarm environment
 # env = make_env_.make_env('simple_tag_guided_1v2')
 # create interactive policies for each agent
 # policies = [InteractivePolicy(env,i) for i in range(env.n)]
-print(env.observation_space)
-print(env.action_space)
+# print(env.observation_space)
+# print(env.action_space)
 # env.observation_space
 
 
@@ -78,16 +78,16 @@ for i_episode in range(3):  # number of simulations
             
 
         # print('*'*30)
-        # print('next_state\n',next_state)
+        print('next_state\n',next_state)
         # print('\nreward\n',reward)
         rewards.append(reward)
         # print('\ndone\n',done)
-        print('\ninfo\n',info)
+        # print('\ninfo\n',info)
         # print('*'*30)
 
         # print(len(observation))
         # print(observation[0].shape)
-        # print(observation[0])
+        # pprint.pprint(observation)
     # pprint.pprint(rewards)
     df = pd.DataFrame(rewards)
     df.to_csv('save/rewards{}.csv'.format(i_episode))
@@ -96,7 +96,3 @@ for i_episode in range(3):  # number of simulations
 
 env.close()
 
-
-# obs = [np.array([ 0.        ,  0.        , -0.71170829,  0.82181501,  0.62097461, -0.89593826,  1.14709038,  0.16188317,  0.        ,  0.        ,0.        ,  0.        ]),
-#  np.array([ 0.        ,  0.        , -0.09073367, -0.07412326, -0.62097461,  0.89593826,  0.52611577,  1.05782144,  0.        ,  0.        ,0.        ,  0.        ]),
-#  np.array([ 0.        ,  0.        ,  0.43538209,  0.98369818, -1.14709038, -0.16188317, -0.52611577, -1.05782144,  0.        ,  0.        ,0.        ,  0.        ])]
