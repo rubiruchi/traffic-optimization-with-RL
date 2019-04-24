@@ -14,6 +14,11 @@ with driverless cars. Biggest difference between our project and previous
 Download or clone the project folder. Within the folder,
 run `deneme.py` to start the simulation. 
 
+needs: 
+gym --version==10.9
+pyglet
+tensorflow
+
 Note: `deneme` is the current state of the created gym environment. 
 Agents are not controlled with an RL algorithm yet. But the environment has all the 
 necessary functions (step(), reset() etc.) and ready to run by an RL algorithm. 
