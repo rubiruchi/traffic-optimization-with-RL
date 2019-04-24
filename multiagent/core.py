@@ -270,6 +270,9 @@ class World(object):
         # set actions for scripted agents
         for agent in self.scripted_agents:
             agent.action = agent.action_callback(agent, self)
+        #! set collision to false
+        for agent in self.give_agents:
+            agent.isCollided = False
         # gather forces applied to entities
         p_force = [None] * len(self.entities)
         # apply agent physical controls
