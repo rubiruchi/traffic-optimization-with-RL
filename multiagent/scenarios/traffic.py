@@ -146,7 +146,7 @@ class Scenario(BaseScenario):
 
     def observation(self, agent, world):
         '''
-        Agent's observation is just it's 4 sensor measurements
+        Agent's observation: position + destination + velocity + it's 4 sensor measurements
         '''
         other_agent_positions = [a.state.p_pos for a in world.give_agents if a is not self]
         wall_positions = [l.state.p_pos for l in world.give_landmarks]
@@ -158,8 +158,10 @@ class Scenario(BaseScenario):
         res = getsensormeasurements(other_agent_positions, wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist)
         # print('-'*50)
         # print(np.array(res))
-
-        return np.array(res)
+        res = np.array(res)
+        des = np.array([np.mean(agent.destination[:2]), np.mean(agent.destination[2:])])
+        res_ = np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + [des] + [res])
+        return res_
 
 #! Helper functions for sensor measurements
 def getline(wall_position, wall_length):

@@ -20,11 +20,11 @@ env = make_env_.make_env('traffic', benchmark=True)
 num_of_agents = env.n
 num_of_walls = len(env.world.landmarks)
 
-state_size = 4 
+state_size = 2+2+2+4 
 # [agent's velocity(2d vector) + agent's position(2d vector) +
-# landmark's relative position(k*2d vector)
-# other agent's relative position((n-1)*2d vector) +
-# other agent's relative velocity((n-1)*2d vector)) ]
+# agent's destination(2d vector)
+# sensor values (4d vector) +
+
 
 
 action_size = 4  # discrete action space [up,down,left,right]
@@ -35,7 +35,7 @@ render = True
 n_episodes = 1000 if not testing else 3  # number of simulations
 n_steps = 300 if not testing else 300  # number of steps
 
-load_episode = 0
+load_episode = 200
 
 output_dir = 'model_output/traffic/DPG_5v5'
 
