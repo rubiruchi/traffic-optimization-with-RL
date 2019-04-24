@@ -82,7 +82,7 @@ for i_episode in range(3):  # number of simulations
         # print('\nreward\n',reward)
         rewards.append(reward)
         # print('\ndone\n',done)
-        # print('\ninfo\n',info)
+        print('\ninfo\n',info)
         # print('*'*30)
 
         # print(len(observation))
