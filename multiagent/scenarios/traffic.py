@@ -148,13 +148,14 @@ class Scenario(BaseScenario):
         '''
         Agent's observation is just it's 4 sensor measurements
         '''
+        other_agent_positions = [a.state.p_pos for a in world.give_agents if a is not self]
         wall_positions = [l.state.p_pos for l in world.give_landmarks]
         wall_length = world.give_landmarks[0].shape[0]
         agent_position = agent.state.p_pos
         agent_radius = agent.size 
         max_sensor_dist = agent.s_dist
 
-        res = getsensormeasurements(wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist)
+        res = getsensormeasurements(other_agent_positions, wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist)
         # print('-'*50)
         # print(np.array(res))
 
@@ -260,15 +261,24 @@ def getsensormeasurements_2(other_agent_pos, agent_position, agent_radius, max_s
                 
     return measurements
 
-def getsensormeasurements(wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist):
+def getsensormeasurements(other_agent_positions, wall_positions, wall_length, agent_position, agent_radius, max_sensor_dist):
     '''
     Returns an array of sensor measurements (distances) in form of: [left,right,down,up]
     '''
     measurements = [max_sensor_dist]*4
-    # calculations start
-    meas = np.array([getsensormeasurements_(w_pos, wall_length, agent_position,
-                                            agent_radius, max_sensor_dist) for w_pos in wall_positions])
-    # calculations end
-    return meas.min(axis=0)
+    #calculations start
+    
+    meas1 = np.array([getsensormeasurements_(w_pos,wall_length,agent_position,agent_radius,max_sensor_dist) for w_pos in wall_positions]) 
+    meas1_ = meas1.min(axis=0)
+    
+    meas2 = np.array([getsensormeasurements_2(o_a_pos, agent_position, agent_radius, max_sensor_dist) for o_a_pos in other_agent_positions])
+    meas2_ = meas2.min(axis=0)
+    
+    # pprint.pprint(meas1)
+    # print('-'*30)
+    # pprint.pprint(meas2)
+    
+    #calculations end
+    return np.vstack((meas1_,meas2_)).min(axis=0)
 
     
