@@ -37,6 +37,9 @@ def deterministic_actions():
     # print(action)
     return action
 
+def stop_action():
+    action = np.array([1,0,0,0,0])
+    return action
 
 def deterministic_actions2():
     action = fixed2()
@@ -65,8 +68,17 @@ for i_episode in range(3):  # number of simulations
         env.render()
 
         # my_action = [deterministic_actions2()]
-        my_action = [deterministic_actions() if i < env.n /
-                     2 else deterministic_actions2()for i in range(env.n)]
+        # my_action = [deterministic_actions() if i < env.n /
+        #              2 else deterministic_actions2()for i in range(env.n)]
+        my_action = []
+        for i,agent in enumerate(env.agents):
+            if agent.isDone:
+                my_action.append(stop_action())
+            else:
+                if i < env.n/2:
+                    my_action.append(deterministic_actions())
+                else:
+                    my_action.append(deterministic_actions2())
 
         next_state, reward, done, info = env.step(my_action)
 
@@ -79,7 +91,7 @@ for i_episode in range(3):  # number of simulations
 
         # print('*'*30)
         # print('next_state\n',next_state)
-        # print('\nreward\n',reward)
+        print('\nreward\n',reward)
         rewards.append(reward)
         # print('\ndone\n',done)
         print('\ninfo\n',info)

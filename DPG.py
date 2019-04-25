@@ -8,8 +8,9 @@ tf.set_random_seed(1)
 
 
 class PolicyGradientAgent:
-    def __init__(self, state_size, action_size, learning_rate=0.001, gamma=0.95):
+    def __init__(self, state_size, action_size, gym_agent, learning_rate=0.001, gamma=0.95):
 
+        self.gym_agent = gym_agent
         self.state_size = state_size
         self.action_size = action_size
         self.learning_rate = learning_rate

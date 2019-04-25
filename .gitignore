@@ -135,3 +135,6 @@ multiagent/scenarios/__pycache__/swarm2.cpython-36.pyc
 
 # saved weights
 **/model_output
+
+# saved records, screenshots
+**/save
