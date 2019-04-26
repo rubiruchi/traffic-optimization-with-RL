@@ -29,15 +29,15 @@ state_size = 2+2+2+4
 
 action_size = 4  # discrete action space [up,down,left,right]
 
-testing = True  # render in testing
+testing = False  # render in testing
 render = True
 
-n_episodes = 1000 if not testing else 5  # number of simulations
-n_steps = 300 if not testing else 500  # number of steps
+n_episodes = 20000 if not testing else 5  # number of simulations
+n_steps = 300 if not testing else 300  # number of steps
 
-load_episode = 10500#3500#10550
+load_episode = 1300#3500#10550
 
-output_dir = 'model_output/traffic/DPG_5v5'
+output_dir = 'model_output/traffic/DPG_5v5_v2'
 
 # # ────────────────────────────────────────────────────────────────────────────────
 # if testing:
@@ -96,9 +96,9 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
 
     for step in range(1, n_steps+1):  # for every step
         #* if all the agents reached the destination pass to the next episode
-        if all([agent.gym_agent.isDone == 1 for agent in agents]):
-            # print('all done')
-            break
+        # if all([agent.gym_agent.isDone == 1 for agent in agents]):
+        #     # print('all done')
+        #     break
 
         if (render):
             env.render()
@@ -107,10 +107,18 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
         all_actions_index = []
         for state, agent in zip(states, agents):
             # state = np.reshape(state, [1, state_size]) #! reshape the state for DQN model
-            if agent.gym_agent.isDone:
-                all_actions.append(np.array([1,0,0,0,0]))
-                # all_actions_index.append(1)
-            else:
+            if testing:
+                if agent.gym_agent.isDone:
+                    all_actions.append(np.array([1,0,0,0,0]))
+                    #* dont use actions after isDone
+                    all_actions_index.append(1)
+                else:
+                    act_index = agent.act(state)
+                    all_actions_index.append(act_index)
+                    onehot_action = np.zeros(action_size+1)
+                    onehot_action[act_index+1] = 1
+                    all_actions.append(onehot_action)
+            else: #training
                 act_index = agent.act(state)
                 all_actions_index.append(act_index)
                 onehot_action = np.zeros(action_size+1)
@@ -121,7 +129,7 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
             all_actions)  # take a step (update all agents)
 
         # ─────────────────────────────────────────────────────────────────
-        # * collision,reward statistics
+        #* collision,reward statistics
         for i in range(num_of_agents):
             collisions[i] += (infos['collision'][i])
             rewards_[i] += (rewards[i])
@@ -131,8 +139,9 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
         #     state = np.reshape(state, [1, state_size]) #! reshape the state for DQN model
 
         for i, agent in enumerate(agents):
-            if i < len(all_actions_index):
-                agent.remember(states[i], all_actions_index[i], rewards[i])
+            #* dont use steps after agent
+            # if i < len(all_actions_index):
+            agent.remember(states[i], all_actions_index[i], rewards[i])
             # remember the previous timestep's state, actions, reward vs.
 
         states = next_states  # update the states
