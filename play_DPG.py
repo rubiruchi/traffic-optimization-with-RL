@@ -29,13 +29,15 @@ state_size = 2+2+2+4
 
 action_size = 4  # discrete action space [up,down,left,right]
 
-testing = False  # render in testing
-render = False
+testing = True  # render in testing
+render = True
 
-n_episodes = 5 if  testing else 100000  # number of simulations
+n_episodes = 10 if  testing else 100000  # number of simulations
 n_steps = 300 if testing else 300  # number of steps
 
-load_episode = 0
+saving_freq = 500
+
+load_episode = 1000
 
 output_dir = 'model_output/traffic/DPG_5v5_r2'
 
@@ -200,7 +202,7 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
     # ────────────────────────────────────────────────────────────────────────────────
     #! save weights
     if not testing:
-        if episode % 50 == 0:
+        if episode % saving_freq == 0:
             for i, agent in enumerate(agents):
                 agent.save(output_dir + "/weights/agent{}/".format(i) +
                            "weights_" + '{:04d}'.format(episode))
