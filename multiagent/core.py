@@ -186,15 +186,20 @@ class Agent(Entity):
         self.action_callback = None
         # is it collided
         self.isCollided = False
-        # does it reached its destination
+        # did it reached its destination
         self.isDone = False
+        # isDone previous step
+        self.isDone_ = False
+        # did it collided before destination
+        self.isWreck = False
+        # isWreck previous step
+        self.isWreck_ = False
         # it's destination
         self.destination = [1]*4  # [-0.2,0.2,-0.2,0.2]
         # it's max sensor distances
         self.s_dist = 0.1
 
     # check if the agent reached it's destination
-
     def isReached(self):
         if isIn(self.state.p_pos, self.destination):
             # print('It is in the area!')
@@ -273,6 +278,7 @@ class World(object):
         #! set collision to false
         for agent in self.give_agents:
             agent.isCollided = False
+            agent.isWreck_ = agent.isWreck #previous isWreck
         # gather forces applied to entities
         p_force = [None] * len(self.entities)
         # apply agent physical controls
@@ -280,12 +286,13 @@ class World(object):
         # apply environment forces
         p_force = self.apply_environment_force(p_force)
         # integrate physical state
-        self.integrate_state(p_force)
+        self.integrate_state(p_force)  #current isWreck
 
         # update agent state(isDone,collide)
         for agent in self.agents:
+            agent.isDone_ = agent.isDone #previous isDone
             if not agent.isDone:
-                agent.isReached()
+                agent.isReached() #current isDone
 
     # gather agent action forces
     def apply_action_force(self, p_force):
@@ -352,6 +359,7 @@ class World(object):
                 if(np.abs(delta_pos[1]) - dumping <= entity_b.shape[1]/2 + entity_a.size):
                     # * collison
                     entity_a.isCollided = True
+                    entity_a.isWreck = True
 
                     # print('Collision with wall')
                     dist = np.sqrt(np.sum(np.square(delta_pos)))
@@ -408,6 +416,10 @@ class World(object):
                 # print('Collision with agent')
                 entity_a.isCollided = True
                 entity_b.isCollided = True
+                    
+                entity_a.isWreck = True
+                entity_b.isWreck = True
+
 
                 pass
             # softmax penetration

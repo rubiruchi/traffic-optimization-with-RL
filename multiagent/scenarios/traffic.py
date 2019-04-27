@@ -51,8 +51,8 @@ class Scenario(BaseScenario):
     def make_world(self):
         world = World()
         # set any world properties first
-        num_of_group1 = 5
-        num_of_group2 = 5
+        num_of_group1 = 0#5
+        num_of_group2 = 1#5
         num_agents = num_of_group2 + num_of_group1
         num_landmarks = getnumberofwall(grid1)
         # add agents
@@ -94,6 +94,7 @@ class Scenario(BaseScenario):
             agent.color = np.array([0.35, 0.85, 0.35]) if not agent.group2 else np.array([0.85, 0.35, 0.35])
             #! isDone is reset back to false and make it collidable
             agent.isDone = False
+            agent.isWreck = False
             agent.collide = True
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
@@ -113,7 +114,6 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np.array(grid2pos(grid1, 0.2))[i]
             landmark.state.p_vel = np.zeros(world.dim_p)
    
-    #! Can use collision detection in step
     def benchmark_data(self, agent, world):
         # returns number of collisions        
         if agent.isCollided:
@@ -133,16 +133,36 @@ class Scenario(BaseScenario):
     def reward(self, agent, world):
         # Reward for an agent: 2 - current distance between agent and its destination 
         if agent.isDone:
-            return 2
-        delta = ((agent.state.p_pos[0] - (agent.destination[0] + agent.destination[1])/2)**2 +\
-                (agent.state.p_pos[1] - (agent.destination[2] + agent.destination[3])/2)**2)**1/2
+            if not agent.isDone_:
+                return 5
+            return 0
+        if agent.isWreck:
+            if not agent.isWreck_:
+                return -5
+            return 0
+        return 0
+
+        # delta = ((agent.state.p_pos[0] - (agent.destination[0] + agent.destination[1])/2)**2 +\
+        #         (agent.state.p_pos[1] - (agent.destination[2] + agent.destination[3])/2)**2)**1/2
         
-        reward = 2 - delta
+        # reward = 2 - delta
+        # reward = self.reward_(agent, world)
+        # # if agent.isCollided:
+        # #     reward -= 1
 
-        if agent.isCollided:
-            reward -= 1
+        # return reward
 
-        return reward
+    # def reward_(self, agent, world):
+
+    #     if agent.isDone:
+    #         if not agent.isDone_:
+    #             return 5
+    #         return 0
+    #     if agent.isWreck:
+    #         if not agent.isWreck_:
+    #             return -5
+    #         return 0
+    #     return 0
 
     def observation(self, agent, world):
         '''
