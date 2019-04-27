@@ -32,7 +32,7 @@ action_size = 4  # discrete action space [up,down,left,right]
 testing = False  # render in testing
 render = False
 
-n_episodes = 5 if  testing else 10000  # number of simulations
+n_episodes = 5 if  testing else 100000  # number of simulations
 n_steps = 300 if testing else 300  # number of steps
 
 load_episode = 0
