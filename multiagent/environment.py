@@ -77,6 +77,7 @@ class MultiAgentEnv(gym.Env):
         self._reset_render()
 
     def step(self, action_n):
+        self.world.timestep += 1
         obs_n = []
         reward_n = []
         done_n = []
@@ -103,6 +104,8 @@ class MultiAgentEnv(gym.Env):
         return obs_n, reward_n, done_n, info_n
 
     def reset(self):
+        # reset timestep
+        self.world.timestep = 0
         # reset world
         self.reset_callback(self.world)
         # reset renderer

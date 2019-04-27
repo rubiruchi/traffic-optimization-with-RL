@@ -51,8 +51,8 @@ class Scenario(BaseScenario):
     def make_world(self):
         world = World()
         # set any world properties first
-        num_of_group1 = 0#5
-        num_of_group2 = 1#5
+        num_of_group1 = 5
+        num_of_group2 = 5
         num_agents = num_of_group2 + num_of_group1
         num_landmarks = getnumberofwall(grid1)
         # add agents
@@ -131,22 +131,27 @@ class Scenario(BaseScenario):
 
 
     def reward(self, agent, world):
-        # Reward for an agent: 2 - current distance between agent and its destination 
+        # score_1 for an agent: 2 - current distance between agent and its destination 
+        delta_pos = ((agent.state.p_pos[0] - (agent.destination[0] + agent.destination[1])/2)**2 +\
+                (agent.state.p_pos[1] - (agent.destination[2] + agent.destination[3])/2)**2)**1/2
+        
+        score_1 = (2 - delta_pos)*100 # 2 is the max possible distance
+
+        score_2 = - world.timestep # current step number
+
+        score = score_1 + score_2 # looks at the distance to the destionation and also the time spend 
+        
         if agent.isDone:
             if not agent.isDone_:
-                return 5
+                return score + 100
             return 0
         if agent.isWreck:
             if not agent.isWreck_:
-                return -5
+                return score - 200
             return 0
         return 0
 
-        # delta = ((agent.state.p_pos[0] - (agent.destination[0] + agent.destination[1])/2)**2 +\
-        #         (agent.state.p_pos[1] - (agent.destination[2] + agent.destination[3])/2)**2)**1/2
-        
-        # reward = 2 - delta
-        # reward = self.reward_(agent, world)
+                # reward = self.reward_(agent, world)
         # # if agent.isCollided:
         # #     reward -= 1
 

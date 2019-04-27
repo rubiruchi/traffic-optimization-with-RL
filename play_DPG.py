@@ -29,15 +29,15 @@ state_size = 2+2+2+4
 
 action_size = 4  # discrete action space [up,down,left,right]
 
-testing = True  # render in testing
-render = True
+testing = False  # render in testing
+render = False
 
 n_episodes = 5 if  testing else 10000  # number of simulations
-n_steps = 300 if testing else 200  # number of steps
+n_steps = 300 if testing else 300  # number of steps
 
-load_episode = 1000#3500#10550
+load_episode = 0
 
-output_dir = 'model_output/traffic/DPG_5v5_v2'
+output_dir = 'model_output/traffic/DPG_5v5_r2'
 
 # # ────────────────────────────────────────────────────────────────────────────────
 # if testing:
@@ -95,10 +95,9 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
     states = env.reset()  # reset states at start of each new episode of the game
 
     for step in range(1, n_steps+1):  # for every step
-        #* if all the agents reached the destination pass to the next episode
-        # if all([agent.gym_agent.isDone == 1 for agent in agents]):
-        #     # print('all done')
-        #     break
+        #* if all the agents reached the destination or Wreck pass to the next episode
+        if all([agent.gym_agent.isDone or agent.gym_agent.isWreck for agent in agents]):
+            break
 
         if (render):
             env.render()
@@ -163,19 +162,28 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
     # ────────────────────────────────────────────────────────────────────────────────
 
     print("\n episode: {}/{}, \
-    collisions: {}|{}|{}, \
-    rewards: {:.2f}|{:.2f}|{:.2f}, \
-    losses: {:.2f}|{:.2f}|{:.2f}".format(episode,
+    collisions: {}|{}|{}|{}|{}|{} \
+    rewards: {:.2f}|{:.2f}|{:.2f}|{:.2f}|{:.2f}|{:.2f}, \
+    losses: {:.2f}|{:.2f}|{:.2f}|{:.2f}|{:.2f}|{:.2f}".format(episode,
                                          n_episodes,
                                          collisions[0],
                                          collisions[1],
                                          collisions[2],
+                                         collisions[-3],
+                                         collisions[-2],
+                                         collisions[-1],
                                          rewards_[0],
                                          rewards_[1],
                                          rewards_[2],
+                                         rewards_[-3],
+                                         rewards_[-2],
+                                         rewards_[-1],
                                          losses[0],
                                          losses[1],
-                                         losses[2]))
+                                         losses[2],
+                                         losses[-3],
+                                         losses[-2],
+                                         losses[-1]))
 
     #! episode,collisions,rewards,losses statistics written
     statictics_row.append(episode)

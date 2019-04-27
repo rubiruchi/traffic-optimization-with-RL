@@ -232,6 +232,7 @@ class Agent(Entity):
 # multi-agent world
 class World(object):
     def __init__(self):
+        self.timestep = 0
         # list of agents and entities (can change at execution-time!)
         self.agents = []
         self.landmarks = []
