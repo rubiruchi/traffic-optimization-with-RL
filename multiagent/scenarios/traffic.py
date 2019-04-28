@@ -67,11 +67,13 @@ class Scenario(BaseScenario):
             agent.accel = 3.0 if agent.group2 else 3.0
             #agent.accel = 20.0 if agent.group2 else 25.0
             # agent.max_speed = 1.0 if agent.group2 else 1.0
-            #! if agents are too fast, they will shows wrong movements
-            if i%2 == 0 :
-                agent.max_speed = 1.0/5  if agent.group2 else 1.0/5 
-            else: #! half of agents are slower
-                agent.max_speed = 1.0/8 if agent.group2 else 1.0/8
+            #* if agents are too fast, they will shows wrong movements
+            #! agents are slow or fast in each episode, randomly
+            agent.max_speed = random.sample([1.0/6, 1.0/8, 1.0/10],1)
+            # if i%2 == 0 :
+            #     agent.max_speed = 1.0/5  if agent.group2 else 1.0/5 
+            # else: 
+            #     agent.max_speed = 1.0/8 if agent.group2 else 1.0/8
         #! add landmarks vertical and horizontal
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         # print([(i, lan.pos) for i,lan in enumerate(world.landmarks) ])
