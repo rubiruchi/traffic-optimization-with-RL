@@ -110,7 +110,7 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
             
             if agent.gym_agent.isDone or agent.gym_agent.isWreck:
                 all_actions.append(np.array([1,0,0,0,0]))
-                
+                all_actions_index.append(0)
             else:
                 act_index = agent.act(state)
                 all_actions_index.append(act_index)
@@ -132,9 +132,10 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
         #     state = np.reshape(state, [1, state_size]) #! reshape the state for DQN model
 
         for i, agent in enumerate(agents):
-            #* dont use steps after agent
-            if i < len(all_actions_index):
-                agent.remember(states[i], all_actions_index[i], rewards[i])
+            #! dont use the steps after isDone or isWreck 
+            if agent.gym_agent.isWreck_ or agent.gym_agent.isDone_:
+                continue
+            agent.remember(states[i], all_actions_index[i], rewards[i])
             # remember the previous timestep's state, actions, reward vs.
 
         states = next_states  # update the states

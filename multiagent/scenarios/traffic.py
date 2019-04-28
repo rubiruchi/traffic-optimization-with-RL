@@ -103,10 +103,10 @@ class Scenario(BaseScenario):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
         pos_group1 = createPos(number_of_agent=len(world.agents)//2,
-                               starting_box=[0.7,0.95,-0.15,0.15],
+                               starting_box=[0.7,0.95,-0.12,0.18],
                                dist_betw=0.04*3) #0.04 is agent radius
         pos_group2 = createPos(number_of_agent=len(world.agents)//2,
-                               starting_box=[-0.15,0.15,0.7,0.95],
+                               starting_box=[-0.12,0.18,0.7,0.95],
                                dist_betw=0.04*3) #0.04 is agent radius
         g1_index = 0
         g2_index = 0
