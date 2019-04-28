@@ -27,19 +27,19 @@ state_size = 2+2+2+4
 
 
 
-action_size = 4  # discrete action space [up,down,left,right]
+action_size = 5  # discrete action space [up,down,left,right,dont move]
 
-testing = True  # render in testing
+testing = False  # render in testing
 render = True
 
 n_episodes = 10 if  testing else 100000  # number of simulations
 n_steps = 300 if testing else 300  # number of steps
 
-saving_freq = 500
+saving_freq = 50
 
-load_episode = 27000
+load_episode = 0
 
-output_dir = 'model_output/traffic/DPG_5v5_r2'
+output_dir = 'model_output/traffic/DPG_5v5_v3'
 
 # # ────────────────────────────────────────────────────────────────────────────────
 # if testing:
@@ -107,25 +107,17 @@ for episode in range(1, n_episodes+1):  # iterate over new episodes of the game
         all_actions = []
         all_actions_index = []
         for state, agent in zip(states, agents):
-            # state = np.reshape(state, [1, state_size]) #! reshape the state for DQN model
-            # if testing:
+            
             if agent.gym_agent.isDone or agent.gym_agent.isWreck:
                 all_actions.append(np.array([1,0,0,0,0]))
-                #* dont use actions after isDone
-                # all_actions_index.append(1)
+                
             else:
                 act_index = agent.act(state)
                 all_actions_index.append(act_index)
-                onehot_action = np.zeros(action_size+1)
-                onehot_action[act_index+1] = 1
+                onehot_action = np.zeros(action_size)
+                onehot_action[act_index] = 1
                 all_actions.append(onehot_action)
-            # else: #training
-            #     act_index = agent.act(state)
-            #     all_actions_index.append(act_index)
-            #     onehot_action = np.zeros(action_size+1)
-            #     onehot_action[act_index+1] = 1
-            #     all_actions.append(onehot_action)
-
+            
         next_states, rewards, dones, infos = env.step(
             all_actions)  # take a step (update all agents)
 
