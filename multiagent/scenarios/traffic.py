@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import random
 from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario
 import sys
@@ -99,13 +100,25 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
+        pos_group1 = createPos(number_of_agent=len(world.agents)//2,
+                               starting_box=[0.7,0.95,-0.15,0.15],
+                               dist_betw=0.04*3) #0.04 is agent radius
+        pos_group2 = createPos(number_of_agent=len(world.agents)//2,
+                               starting_box=[-0.15,0.15,0.7,0.95],
+                               dist_betw=0.04*3) #0.04 is agent radius
+        g1_index = 0
+        g2_index = 0
         for agent in world.agents:
             if agent.group2: #! position of the agents
                 # agent.state.p_pos = np.array([-1,0]) + agent.size
-                agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0,0.7])
+                # agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0,0.7])
+                agent.state.p_pos = np.array(pos_group2[g2_index])
+                g2_index+=1
                 agent.destination = [-0.2,0.2,-1,-0.8] #! destination of the agents in group2
             else: #group1
-                agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0.7,0])
+                # agent.state.p_pos = np.random.uniform(-0.19, +0.19, world.dim_p) + np.array([0.7,0])
+                agent.state.p_pos = np.array(pos_group1[g1_index])
+                g1_index+=1
                 agent.destination = [-1,-0.8,-0.2,0.2] #! destination of the agents in group1
  
             agent.state.p_vel = np.zeros(world.dim_p)
@@ -187,6 +200,22 @@ class Scenario(BaseScenario):
         des = np.array([np.mean(agent.destination[:2]), np.mean(agent.destination[2:])])
         res_ = np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + [des] + [res])
         return res_
+
+#! Helper function for pozitioning agents
+def createPos(number_of_agent, starting_box=[-0.18,0.2,-0.9,-0.7], dist_betw=0.04):
+    '''
+    returns an list of sampled positions
+    '''
+    grid_hor = np.arange(starting_box[0],starting_box[1],dist_betw)
+    grid_ver = np.arange(starting_box[2],starting_box[3],dist_betw)
+    grid = []
+    for i in grid_hor:
+        for j in grid_ver:
+            grid.append([i,j])
+    # grid = np.array(grid)
+    sample = random.sample(grid, k=number_of_agent)    
+    return sample
+    
 
 #! Helper functions for sensor measurements
 def getline(wall_position, wall_length):

@@ -37,7 +37,7 @@ n_steps = 300 if testing else 300  # number of steps
 
 saving_freq = 500
 
-load_episode = 1000
+load_episode = 27000
 
 output_dir = 'model_output/traffic/DPG_5v5_r2'
 
